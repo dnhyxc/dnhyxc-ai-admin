@@ -1,0 +1,42 @@
+import {
+	Controller,
+	Get,
+	Query,
+	UseGuards,
+	UseInterceptors,
+} from '@nestjs/common';
+import { Type } from 'class-transformer';
+import { IsInt, IsOptional, Min } from 'class-validator';
+import { Roles } from '../../decorators/roles.decorator';
+import { Role } from '../../enum/roles.enum';
+import { JwtGuard } from '../../guards/jwt.guard';
+import { RoleGuard } from '../../guards/role.guard';
+import { ResponseInterceptor } from '../../interceptors/response.interceptor';
+import { LogsService } from './logs.service';
+
+class GetLogsQuery {
+	@IsOptional()
+	@Type(() => Number)
+	@IsInt()
+	@Min(1)
+	pageNo?: number = 1;
+
+	@IsOptional()
+	@Type(() => Number)
+	@IsInt()
+	@Min(1)
+	pageSize?: number = 20;
+}
+
+@Controller('logs')
+@UseGuards(JwtGuard, RoleGuard)
+@Roles(Role.ADMIN, Role.USER)
+@UseInterceptors(ResponseInterceptor)
+export class LogsController {
+	constructor(private readonly logsService: LogsService) {}
+
+	@Get('/getLogs')
+	getLogs(@Query() query: GetLogsQuery) {
+		return this.logsService.findAll(query.pageNo, query.pageSize);
+	}
+}

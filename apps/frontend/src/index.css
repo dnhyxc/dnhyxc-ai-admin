@@ -1,0 +1,41 @@
+@import "tailwindcss";
+
+html,
+body,
+#root {
+	height: 100%;
+	min-height: 100%;
+	margin: 0;
+}
+
+body {
+	-webkit-font-smoothing: antialiased;
+}
+
+/* ConfigProvider / App 中间层也要拉满，否则 Layout 的 height:100% 无效 */
+#root,
+#root .ant-app {
+	display: flex;
+	flex-direction: column;
+	min-height: 100%;
+	height: 100%;
+}
+
+.admin-layout {
+	flex: 1;
+	min-height: 100vh !important;
+}
+
+/* 登录页背景网格，不依赖 antd token */
+.login-grid {
+	background-image:
+		linear-gradient(rgba(15, 61, 62, 0.06) 1px, transparent 1px),
+		linear-gradient(90deg, rgba(15, 61, 62, 0.06) 1px, transparent 1px);
+	background-size: 28px 28px;
+}
+
+html.dark .login-grid {
+	background-image:
+		linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+		linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+}

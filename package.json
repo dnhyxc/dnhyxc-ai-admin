@@ -1,0 +1,41 @@
+{
+	"name": "dnhyxc-admin",
+	"version": "0.0.1",
+	"description": "dnhyxc-ai 配套后台管理系统：NestJS + React 前后端分离 monorepo，企业级多数据源（Admin 库 / AI 业务库）。",
+	"type": "module",
+	"scripts": {
+		"dev": "pnpm run server:dev & pnpm run dev:frontend",
+		"dev:frontend": "pnpm -C apps/frontend dev",
+		"server:dev": "pnpm -C apps/backend start:dev",
+		"server:start": "pnpm -C apps/backend start",
+		"server:debug": "pnpm -C apps/backend start:debug",
+		"server:prod": "pnpm -C apps/backend start:prod",
+		"server:build": "pnpm -C apps/backend build",
+		"build:frontend": "pnpm -C apps/frontend build",
+		"check": "biome check --write",
+		"check:staged": "biome check --staged --no-errors-on-unmatched",
+		"format": "biome format --write",
+		"prepare": "husky install",
+		"commit": "git-cz"
+	},
+	"keywords": ["dnhyxc-admin", "nestjs", "react", "admin"],
+	"author": "dnhyxc <dnhyxc@163.com>",
+	"license": "ISC",
+	"packageManager": "pnpm@10.8.1",
+	"devDependencies": {
+		"@biomejs/biome": "^2.4.13",
+		"@commitlint/config-conventional": "^20.2.0",
+		"@types/node": "^22.10.7",
+		"commitlint": "20.2.0",
+		"husky": "8.0.3",
+		"typescript": "~5.8.3"
+	},
+	"config": {
+		"commitizen": {
+			"path": "cz-customizable"
+		}
+	},
+	"pnpm": {
+		"onlyBuiltDependencies": ["bcrypt", "esbuild"]
+	}
+}

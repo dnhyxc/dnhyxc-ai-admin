@@ -1,0 +1,38 @@
+# Logs（仅忽略运行时日志目录，勿误伤源码 paths）
+/logs
+apps/backend/logs
+!apps/backend/src/services/logs
+!apps/backend/src/services/logs/**
+!apps/frontend/src/views/logs
+!apps/frontend/src/views/logs/**
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+dist.zip
+
+# Editor
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Env & secrets
+.env
+.env.*
+!.env.example
+!.env.*.example
+.npmrc
+.pnpm-store
