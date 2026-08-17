@@ -25,13 +25,28 @@ export class DashboardService {
 
 		let aiUsers: number | null = null;
 		let aiDb = { connected: false, message: '未启用' };
+		const emptyAiStats = {
+			totalUsers: 0,
+			activeUsersToday: 0,
+			totalEbooks: 0,
+			totalChats: 0,
+			totalRevenue: 0,
+			newUsersThisWeek: 0,
+			usersGrowth: [] as { date: string; count: number }[],
+			moduleUsage: [] as { name: string; count: number }[],
+			membershipDistribution: [] as { name: string; value: number }[],
+		};
+
+		let aiStats = emptyAiStats;
 		if (this.aiUserService) {
 			aiDb = await this.aiUserService.getHealth();
 			if (aiDb.connected) {
 				try {
 					aiUsers = await this.aiUserService.count();
+					aiStats = await this.aiUserService.getDashboardStats(aiUsers);
 				} catch {
 					aiUsers = null;
+					aiStats = emptyAiStats;
 				}
 			}
 		}
@@ -43,6 +58,7 @@ export class DashboardService {
 			logs,
 			aiUsers,
 			aiDb,
+			...aiStats,
 		};
 	}
 }

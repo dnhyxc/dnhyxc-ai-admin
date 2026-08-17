@@ -1,8 +1,14 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import {
+	Column,
+	Entity,
+	JoinTable,
+	ManyToMany,
+	PrimaryGeneratedColumn,
+} from 'typeorm';
+import { AiRole } from './ai-role.entity';
 
 /**
  * 映射 dnhyxc-ai 业务库 `user` 表（只读管理子集）
- * 字段与产品侧保持兼容；不声明复杂关联，避免跨库关系误用。
  */
 @Entity({ name: 'user' })
 export class AiUser {
@@ -26,4 +32,15 @@ export class AiUser {
 
 	@Column({ type: 'timestamp', nullable: true })
 	memberExpiresAt: Date | null;
+
+	@ManyToMany(
+		() => AiRole,
+		(role) => role.users,
+	)
+	@JoinTable({
+		name: 'user_roles',
+		joinColumn: { name: 'userId', referencedColumnName: 'id' },
+		inverseJoinColumn: { name: 'rolesId', referencedColumnName: 'id' },
+	})
+	roles: AiRole[];
 }

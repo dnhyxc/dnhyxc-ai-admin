@@ -1,6 +1,8 @@
 import { createBrowserRouter, Navigate } from 'react-router';
 import { AdminLayout } from '@/components/layout/AdminLayout';
 import { store } from '@/store';
+import { AiEbooksPage } from '@/views/ai-ebooks/AiEbooksPage';
+import { AiLogsPage } from '@/views/ai-logs/AiLogsPage';
 import { AiUsersPage } from '@/views/ai-users/AiUsersPage';
 import { DashboardPage } from '@/views/dashboard/DashboardPage';
 import { LoginPage } from '@/views/login/LoginPage';
@@ -34,6 +36,8 @@ export const router = createBrowserRouter([
 			{ path: 'roles', element: <RolesPage /> },
 			{ path: 'menus', element: <MenusPage /> },
 			{ path: 'ai-users', element: <AiUsersPage /> },
+			{ path: 'ai-ebooks', element: <AiEbooksPage /> },
+			{ path: 'ai-logs', element: <AiLogsPage /> },
 			{ path: 'logs', element: <LogsPage /> },
 		],
 	},

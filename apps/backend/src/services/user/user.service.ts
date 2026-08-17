@@ -1,7 +1,12 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+	BadRequestException,
+	Injectable,
+	NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Like, Repository } from 'typeorm';
 import { hashPassword } from '../../utils';
+import { Logs } from '../logs/logs.entity';
 import { Roles } from '../roles/roles.entity';
 import { CreateUserDTO } from './dto/create-user.dto';
 import { GetUserDto } from './dto/get-user.dto';
@@ -17,6 +22,8 @@ export class UserService {
 		private readonly rolesRepository: Repository<Roles>,
 		@InjectRepository(Profile)
 		private readonly profileRepository: Repository<Profile>,
+		@InjectRepository(Logs)
+		private readonly logsRepository: Repository<Logs>,
 	) {}
 
 	async findAll(query: GetUserDto): Promise<{ list: User[]; total: number }> {
@@ -94,17 +101,45 @@ export class UserService {
 		if (dto.email) user.email = dto.email;
 		if (typeof dto.isActive === 'boolean') user.isActive = dto.isActive;
 		if (dto.password) user.password = await hashPassword(dto.password);
-		if (dto.roleIds) {
-			user.roles = await this.rolesRepository.findBy({ id: In(dto.roleIds) });
+		if (dto.roleIds !== undefined) {
+			user.roles = dto.roleIds.length
+				? await this.rolesRepository.findBy({ id: In(dto.roleIds) })
+				: [];
 		}
 
 		return this.userRepository.save(user);
 	}
 
 	async remove(id: number) {
+		if (id === 1) {
+			throw new BadRequestException('不能删除默认超级管理员账号');
+		}
+
 		const user = await this.findOne(id);
 		if (!user) throw new NotFoundException('用户不存在');
-		return this.userRepository.remove(user);
+
+		// 先解绑角色中间表
+		user.roles = [];
+		await this.userRepository.save(user);
+
+		// 操作日志保留，仅断开用户外键（避免 FK 约束失败）
+		await this.logsRepository.query(
+			'UPDATE logs SET userId = NULL WHERE userId = ?',
+			[id],
+		);
+
+		// Profile 拥有外键，需先删
+		if (user.profile) {
+			await this.profileRepository.remove(user.profile);
+		} else {
+			const profile = await this.profileRepository.findOne({
+				where: { user: { id } },
+			});
+			if (profile) await this.profileRepository.remove(profile);
+		}
+
+		await this.userRepository.delete(id);
+		return { id };
 	}
 
 	count(): Promise<number> {

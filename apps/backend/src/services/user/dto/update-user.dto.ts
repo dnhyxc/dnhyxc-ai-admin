@@ -1,7 +1,9 @@
+import { Transform } from 'class-transformer';
 import {
 	IsArray,
 	IsBoolean,
 	IsEmail,
+	IsInt,
 	IsOptional,
 	IsString,
 	Length,
@@ -22,6 +24,10 @@ export class UpdateUserDTO {
 	isActive?: boolean;
 
 	@IsOptional()
+	@Transform(({ value }) =>
+		Array.isArray(value) ? value.map((v) => Number(v)) : value,
+	)
 	@IsArray()
+	@IsInt({ each: true })
 	roleIds?: number[];
 }

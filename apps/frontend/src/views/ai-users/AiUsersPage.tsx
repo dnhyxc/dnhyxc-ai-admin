@@ -1,5 +1,6 @@
 import { Alert, Button, Input, Space, Table, Tag, Typography } from 'antd';
 import { useEffect, useState } from 'react';
+import { DEFAULT_PAGE_SIZE, tablePagination } from '@/lib/table-pagination';
 import { getAiUsersApi } from '@/service';
 
 type AiUser = {
@@ -10,21 +11,30 @@ type AiUser = {
 	membershipType: string;
 	memberExpiresAt: string | null;
 	createTime: string | null;
+	roles?: Array<{ id: number; name: string }>;
 };
 
 export function AiUsersPage() {
 	const [list, setList] = useState<AiUser[]>([]);
 	const [total, setTotal] = useState(0);
+	const [pageNo, setPageNo] = useState(1);
+	const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
 	const [username, setUsername] = useState('');
 	const [error, setError] = useState('');
 
-	const load = async () => {
+	const load = async (page = pageNo, size = pageSize) => {
 		try {
 			setError('');
-			const res = await getAiUsersApi({ pageNo: 1, pageSize: 50, username });
+			const res = await getAiUsersApi({
+				pageNo: page,
+				pageSize: size,
+				username: username || undefined,
+			});
 			const data = res.data as { list: AiUser[]; total: number };
 			setList(data.list);
 			setTotal(data.total);
+			setPageNo(page);
+			setPageSize(size);
 		} catch (e: any) {
 			setList([]);
 			setTotal(0);
@@ -36,7 +46,7 @@ export function AiUsersPage() {
 	};
 
 	useEffect(() => {
-		load();
+		load(1, DEFAULT_PAGE_SIZE);
 	}, []);
 
 	return (
@@ -45,19 +55,14 @@ export function AiUsersPage() {
 				style={{
 					display: 'flex',
 					justifyContent: 'space-between',
-					alignItems: 'flex-end',
+					alignItems: 'center',
 					gap: 16,
 					marginBottom: 16,
 				}}
 			>
-				<div>
-					<Typography.Title level={3} style={{ marginTop: 0, marginBottom: 4 }}>
-						AI 用户
-					</Typography.Title>
-					<Typography.Text type="secondary">
-						读取 dnhyxc-ai 业务库 · 共 {total} 人
-					</Typography.Text>
-				</div>
+				<Typography.Text type="secondary">
+					读取 dnhyxc-ai 业务库 · 共 {total} 人
+				</Typography.Text>
 				<Space>
 					<Input
 						placeholder="搜索用户名"
@@ -65,8 +70,11 @@ export function AiUsersPage() {
 						onChange={(e) => setUsername(e.target.value)}
 						style={{ width: 200 }}
 						allowClear
+						onPressEnter={() => load(1, pageSize)}
 					/>
-					<Button onClick={load}>查询</Button>
+					<Button type="primary" onClick={() => load(1, pageSize)}>
+						查询
+					</Button>
 				</Space>
 			</div>
 
@@ -82,12 +90,24 @@ export function AiUsersPage() {
 			<Table
 				rowKey="id"
 				dataSource={list}
-				pagination={false}
 				locale={{ emptyText: error ? ' ' : '暂无数据' }}
+				pagination={tablePagination(total, pageNo, pageSize, load)}
 				columns={[
 					{ title: 'ID', dataIndex: 'id', width: 80 },
 					{ title: '用户名', dataIndex: 'username' },
 					{ title: '邮箱', dataIndex: 'email' },
+					{
+						title: '角色',
+						dataIndex: 'roles',
+						render: (roles: AiUser['roles']) =>
+							roles?.length
+								? roles.map((r) => (
+										<Tag key={r.id} color={r.id === 1 ? 'gold' : 'default'}>
+											{r.name}
+										</Tag>
+									))
+								: '—',
+					},
 					{
 						title: '会员',
 						dataIndex: 'isMember',

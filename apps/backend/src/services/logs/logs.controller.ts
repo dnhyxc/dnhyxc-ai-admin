@@ -1,12 +1,22 @@
 import {
+	Body,
 	Controller,
+	Delete,
 	Get,
+	Param,
+	ParseIntPipe,
 	Query,
 	UseGuards,
 	UseInterceptors,
 } from '@nestjs/common';
 import { Type } from 'class-transformer';
-import { IsInt, IsOptional, Min } from 'class-validator';
+import {
+	ArrayNotEmpty,
+	IsArray,
+	IsInt,
+	IsOptional,
+	Min,
+} from 'class-validator';
 import { Roles } from '../../decorators/roles.decorator';
 import { Role } from '../../enum/roles.enum';
 import { JwtGuard } from '../../guards/jwt.guard';
@@ -28,6 +38,14 @@ class GetLogsQuery {
 	pageSize?: number = 20;
 }
 
+class DeleteLogsDto {
+	@IsArray()
+	@ArrayNotEmpty()
+	@Type(() => Number)
+	@IsInt({ each: true })
+	ids: number[];
+}
+
 @Controller('logs')
 @UseGuards(JwtGuard, RoleGuard)
 @Roles(Role.ADMIN, Role.USER)
@@ -38,5 +56,17 @@ export class LogsController {
 	@Get('/getLogs')
 	getLogs(@Query() query: GetLogsQuery) {
 		return this.logsService.findAll(query.pageNo, query.pageSize);
+	}
+
+	@Delete('/deleteLog/:id')
+	@Roles(Role.ADMIN)
+	deleteLog(@Param('id', ParseIntPipe) id: number) {
+		return this.logsService.remove([id]);
+	}
+
+	@Delete('/deleteLogs')
+	@Roles(Role.ADMIN)
+	deleteLogs(@Body() dto: DeleteLogsDto) {
+		return this.logsService.remove(dto.ids);
 	}
 }

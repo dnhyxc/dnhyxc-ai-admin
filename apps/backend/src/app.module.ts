@@ -4,6 +4,8 @@ import { ConfigModule } from '@nestjs/config';
 import { AI_DB_ENABLED, DatabaseModule } from './database/database.module';
 import { appConfig } from './factorys/app-config.factory';
 import { RedisConfigFactory } from './factorys/redis-config.factory';
+import { AiEbookModule } from './services/ai-ebook/ai-ebook.module';
+import { AiLogsModule } from './services/ai-logs/ai-logs.module';
 import { AiUserModule } from './services/ai-user/ai-user.module';
 import { AuthModule } from './services/auth/auth.module';
 import { DashboardModule } from './services/dashboard/dashboard.module';
@@ -31,7 +33,7 @@ import { UserModule } from './services/user/user.module';
 		SeedModule,
 		HealthModule,
 		DashboardModule,
-		...(AI_DB_ENABLED ? [AiUserModule] : []),
+		...(AI_DB_ENABLED ? [AiUserModule, AiLogsModule, AiEbookModule] : []),
 	],
 	providers: [Logger],
 	exports: [Logger],

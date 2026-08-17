@@ -1,23 +1,21 @@
 import {
 	Button,
-	Card,
-	Form,
 	Input,
+	message,
 	Popconfirm,
 	Select,
 	Space,
 	Table,
 	Tag,
-	Typography,
-	message,
 } from 'antd';
 import { observer } from 'mobx-react';
 import { useEffect, useState } from 'react';
+import { DEFAULT_PAGE_SIZE, tablePagination } from '@/lib/table-pagination';
 import {
-	addUserApi,
 	deleteUserApi,
 	getRolesApi,
 	getUsersApi,
+	updateUserApi,
 } from '@/service';
 import { useStore } from '@/store';
 
@@ -34,23 +32,41 @@ export const UsersPage = observer(function UsersPage() {
 	const canWrite = authStore.isSuperAdmin;
 	const [list, setList] = useState<UserRow[]>([]);
 	const [total, setTotal] = useState(0);
+	const [pageNo, setPageNo] = useState(1);
+	const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
 	const [username, setUsername] = useState('');
 	const [roles, setRoles] = useState<Array<{ id: number; name: string }>>([]);
-	const [form] = Form.useForm();
+	const [savingId, setSavingId] = useState<number | null>(null);
 
-	const load = async () => {
-		const res = await getUsersApi({ pageNo: 1, pageSize: 50, username });
+	const load = async (page = pageNo, size = pageSize) => {
+		const res = await getUsersApi({ pageNo: page, pageSize: size, username });
 		const data = res.data as { list: UserRow[]; total: number };
 		setList(data.list);
 		setTotal(data.total);
+		setPageNo(page);
+		setPageSize(size);
 	};
 
 	useEffect(() => {
-		load();
-		if (canWrite) {
-			getRolesApi().then((res) => setRoles(res.data as any[]));
+		load(1, DEFAULT_PAGE_SIZE);
+		getRolesApi().then((res) => {
+			const data = res.data;
+			setRoles(Array.isArray(data) ? data : []);
+		});
+	}, []);
+
+	const changeRole = async (userId: number, roleId?: number) => {
+		setSavingId(userId);
+		try {
+			await updateUserApi(userId, {
+				roleIds: roleId != null ? [roleId] : [],
+			});
+			message.success('角色已更新');
+			await load();
+		} finally {
+			setSavingId(null);
 		}
-	}, [canWrite]);
+	};
 
 	const columns = [
 		{ title: 'ID', dataIndex: 'id', width: 80 },
@@ -58,12 +74,30 @@ export const UsersPage = observer(function UsersPage() {
 		{ title: '邮箱', dataIndex: 'email' },
 		{
 			title: '角色',
+			width: 220,
 			render: (_: unknown, r: UserRow) =>
-				r.roles?.map((x) => x.name).join('、') || '—',
+				canWrite ? (
+					<Select
+						allowClear
+						placeholder="选择角色"
+						style={{ width: '100%' }}
+						loading={savingId === r.id}
+						disabled={savingId === r.id}
+						value={r.roles?.[0]?.id}
+						options={roles.map((role) => ({
+							value: role.id,
+							label: role.name,
+						}))}
+						onChange={(roleId) => changeRole(r.id, roleId)}
+					/>
+				) : (
+					r.roles?.map((x) => x.name).join('、') || '—'
+				),
 		},
 		{
 			title: '状态',
 			dataIndex: 'isActive',
+			width: 100,
 			render: (v: boolean) =>
 				v ? <Tag color="success">启用</Tag> : <Tag>禁用</Tag>,
 		},
@@ -75,13 +109,14 @@ export const UsersPage = observer(function UsersPage() {
 						render: (_: unknown, r: UserRow) => (
 							<Popconfirm
 								title="确认删除？"
+								disabled={r.id === 1}
 								onConfirm={async () => {
 									await deleteUserApi(r.id);
 									message.success('已删除');
 									load();
 								}}
 							>
-								<Button danger type="link" size="small">
+								<Button danger type="link" size="small" disabled={r.id === 1}>
 									删除
 								</Button>
 							</Popconfirm>
@@ -93,61 +128,6 @@ export const UsersPage = observer(function UsersPage() {
 
 	return (
 		<div>
-			<Typography.Title level={3} style={{ marginTop: 0 }}>
-				管理员
-			</Typography.Title>
-			<Typography.Paragraph type="secondary">共 {total} 人</Typography.Paragraph>
-
-			{canWrite && (
-				<Card size="small" title="新建管理员" style={{ marginBottom: 16 }}>
-					<Form
-						form={form}
-						layout="inline"
-						onFinish={async (values) => {
-							await addUserApi({
-								...values,
-								roleIds: values.roleId ? [values.roleId] : [],
-							});
-							message.success('已创建');
-							form.resetFields();
-							load();
-						}}
-					>
-						<Form.Item
-							name="username"
-							rules={[{ required: true, message: '用户名' }]}
-						>
-							<Input placeholder="用户名" />
-						</Form.Item>
-						<Form.Item
-							name="password"
-							rules={[{ required: true, message: '密码' }]}
-						>
-							<Input.Password placeholder="密码" />
-						</Form.Item>
-						<Form.Item
-							name="email"
-							rules={[{ required: true, message: '邮箱' }]}
-						>
-							<Input placeholder="邮箱" />
-						</Form.Item>
-						<Form.Item name="roleId">
-							<Select
-								allowClear
-								placeholder="角色"
-								style={{ width: 160 }}
-								options={roles.map((r) => ({ value: r.id, label: r.name }))}
-							/>
-						</Form.Item>
-						<Form.Item>
-							<Button type="primary" htmlType="submit">
-								创建
-							</Button>
-						</Form.Item>
-					</Form>
-				</Card>
-			)}
-
 			<Space style={{ marginBottom: 12 }}>
 				<Input
 					placeholder="搜索用户名"
@@ -155,15 +135,18 @@ export const UsersPage = observer(function UsersPage() {
 					onChange={(e) => setUsername(e.target.value)}
 					style={{ width: 200 }}
 					allowClear
+					onPressEnter={() => load(1, pageSize)}
 				/>
-				<Button onClick={load}>查询</Button>
+				<Button type="primary" onClick={() => load(1, pageSize)}>
+					查询
+				</Button>
 			</Space>
 
 			<Table
 				rowKey="id"
 				dataSource={list}
-				pagination={false}
-				columns={columns as any}
+				columns={columns}
+				pagination={tablePagination(total, pageNo, pageSize, load)}
 			/>
 		</div>
 	);

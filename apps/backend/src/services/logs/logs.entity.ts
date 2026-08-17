@@ -34,7 +34,11 @@ export class Logs {
 	@ManyToOne(
 		() => User,
 		(user) => user.logs,
-		{ nullable: true },
+		{
+			nullable: true,
+			// 删除用户时保留操作日志，仅断开关联
+			onDelete: 'SET NULL',
+		},
 	)
 	@JoinColumn()
 	user: User | null;

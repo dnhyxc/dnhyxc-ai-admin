@@ -59,5 +59,23 @@ export const deleteMenuApi = (id: number) =>
 export const getLogsApi = (querys?: Record<string, any>) =>
 	http.get(API.logs, { querys });
 
+export const deleteLogApi = (id: number) =>
+	http.delete(API.deleteLog, { params: [id] });
+
+export const deleteLogsApi = (ids: number[]) =>
+	http.delete(API.deleteLogs, { data: { ids } });
+
 export const getAiUsersApi = (querys?: Record<string, any>) =>
 	http.get(API.aiUsers, { querys, silent: true });
+
+export const getAiLogsApi = (querys?: Record<string, any>) =>
+	http.get(API.aiLogs, { querys, silent: true });
+
+export const deleteAiLogApi = (id: number) =>
+	http.delete(API.deleteAiLog, { params: [id] });
+
+export const deleteAiLogsApi = (ids: number[]) =>
+	http.delete(API.deleteAiLogs, { data: { ids } });
+
+export const getAiEbooksApi = (querys?: Record<string, any>) =>
+	http.get(API.aiEbooks, { querys, silent: true });

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { Logs } from './logs.entity';
 
 @Injectable()
@@ -25,6 +25,12 @@ export class LogsService {
 			skip,
 		});
 		return { list, total };
+	}
+
+	async remove(ids: number[]) {
+		if (!ids.length) return { affected: 0 };
+		const result = await this.logsRepository.delete({ id: In(ids) });
+		return { affected: result.affected ?? 0 };
 	}
 
 	count(): Promise<number> {

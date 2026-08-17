@@ -1,0 +1,24 @@
+{
+	"serverInfo": {
+		"host": "101.43.50.15",
+		"username": "root",
+		"port": "22"
+	},
+	"nginxInfo": {
+		"remoteFilePath": "/usr/local/nginx/conf",
+		"restartPath": "/usr/local/nginx/sbin"
+	},
+	"serviceInfo": {
+		"restartPath": "/usr/local/dnhyxc-ai-admin/dnhyxc-ai-admin-server"
+	},
+	"restartScript": "pm2 restart dnhyxc-ai-admin-server",
+	"dnhyxcAIAdmin": {
+		"name": "dnhyxc-ai-admin",
+		"localFilePath": {
+			"mac": "/Users/dnhyxc/Documents/code/dnhyxc-admin/apps/frontend",
+			"windows": "E:\\code\\dnhyxc-admin\\apps\\frontend"
+		},
+		"remoteFilePath": "/usr/local/nginx/dnhyxc-ai-admin",
+		"isServer": false
+	}
+}

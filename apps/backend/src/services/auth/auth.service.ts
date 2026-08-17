@@ -2,9 +2,9 @@ import { randomUUID } from 'node:crypto';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { InjectRepository } from '@nestjs/typeorm';
 import type { Cache } from 'cache-manager';
 import * as svgCaptcha from 'svg-captcha';
-import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Role } from '../../enum/roles.enum';
 import { comparePassword } from '../../utils';
@@ -136,9 +136,7 @@ export class AuthService {
 			captchaId,
 			captchaSvg: captcha.data,
 			// ponytail: 仅开发环境回传明文，便于联调；生产绝不返回
-			...(process.env.NODE_ENV === 'development'
-				? { captchaText }
-				: {}),
+			...(process.env.NODE_ENV === 'development' ? { captchaText } : {}),
 		};
 	}
 

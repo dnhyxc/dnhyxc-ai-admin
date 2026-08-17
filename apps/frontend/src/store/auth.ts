@@ -31,9 +31,7 @@ export class AuthStore {
 	/** 超级管理员：role.id === 1 或名称为「超级管理员」 */
 	get isSuperAdmin() {
 		return Boolean(
-			this.userInfo?.roles?.some(
-				(r) => r.id === 1 || r.name === '超级管理员',
-			),
+			this.userInfo?.roles?.some((r) => r.id === 1 || r.name === '超级管理员'),
 		);
 	}
 

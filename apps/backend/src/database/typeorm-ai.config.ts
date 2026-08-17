@@ -2,8 +2,11 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { TypeOrmModuleOptions, TypeOrmOptionsFactory } from '@nestjs/typeorm';
 import { AiDbEnum } from '../enum/config.enum';
-import { parseBoolean } from '../utils';
+import { AiEbookBook } from '../services/ai-ebook/ai-ebook-book.entity';
+import { AiLog } from '../services/ai-logs/ai-log.entity';
+import { AiRole } from '../services/ai-user/ai-role.entity';
 import { AiUser } from '../services/ai-user/ai-user.entity';
+import { parseBoolean } from '../utils';
 
 /**
  * AI 业务库（命名连接 `ai`）
@@ -14,13 +17,17 @@ import { AiUser } from '../services/ai-user/ai-user.entity';
 export class TypeOrmAiConfigService implements TypeOrmOptionsFactory {
 	private readonly logger = new Logger(TypeOrmAiConfigService.name);
 
-	constructor(private readonly configService: ConfigService) { }
+	constructor(private readonly configService: ConfigService) {}
 
 	createTypeOrmOptions(): TypeOrmModuleOptions {
 		const enabled = parseBoolean(
 			this.configService.get(AiDbEnum.AI_DB_ENABLED),
 			true,
 		);
+		// 从环境变量读取 AI 业务库连接池大小（AI_DB_POOL_SIZE）
+		// - 未配置时回退为 5，避免连接数过大拖垮对端 MySQL
+		// - Number(...) 将字符串配置统一转为数值，供 mysql2 的 connectionLimit 使用
+		// - 该值最终写入下方 extra.connectionLimit，控制命名连接 `ai` 的并发连接上限
 		const poolSize = Number(
 			this.configService.get(AiDbEnum.AI_DB_POOL_SIZE) ?? 5,
 		);
@@ -41,7 +48,7 @@ export class TypeOrmAiConfigService implements TypeOrmOptionsFactory {
 				this.configService.get<string>(AiDbEnum.AI_DB_DATABASE) ||
 				'dnhyxc_ai_db',
 			timezone: 'Z',
-			entities: [AiUser],
+			entities: [AiUser, AiRole, AiLog, AiEbookBook],
 			// 企业级硬约束：业务库禁止自动同步
 			synchronize: false,
 			logging: false,

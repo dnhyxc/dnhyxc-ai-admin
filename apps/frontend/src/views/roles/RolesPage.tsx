@@ -3,14 +3,14 @@ import {
 	Card,
 	Form,
 	Input,
+	message,
 	Popconfirm,
 	Select,
 	Table,
-	Typography,
-	message,
 } from 'antd';
 import { observer } from 'mobx-react';
 import { useEffect, useState } from 'react';
+import { DEFAULT_PAGE_SIZE, tablePagination } from '@/lib/table-pagination';
 import {
 	createRoleApi,
 	deleteRoleApi,
@@ -31,11 +31,14 @@ export const RolesPage = observer(function RolesPage() {
 	const canWrite = authStore.isSuperAdmin;
 	const [list, setList] = useState<RoleRow[]>([]);
 	const [menus, setMenus] = useState<Array<{ id: number; name: string }>>([]);
+	const [pageNo, setPageNo] = useState(1);
+	const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
 	const [form] = Form.useForm();
 
 	const load = async () => {
 		const res = await getRolesApi();
 		setList(res.data as RoleRow[]);
+		setPageNo(1);
 	};
 
 	useEffect(() => {
@@ -81,10 +84,6 @@ export const RolesPage = observer(function RolesPage() {
 
 	return (
 		<div>
-			<Typography.Title level={3} style={{ marginTop: 0 }}>
-				角色管理
-			</Typography.Title>
-
 			{canWrite && (
 				<Card size="small" title="新建角色" style={{ marginBottom: 16 }}>
 					<Form
@@ -124,8 +123,16 @@ export const RolesPage = observer(function RolesPage() {
 			<Table
 				rowKey="id"
 				dataSource={list}
-				pagination={false}
 				columns={columns as any}
+				pagination={tablePagination(
+					list.length,
+					pageNo,
+					pageSize,
+					(page, size) => {
+						setPageNo(page);
+						setPageSize(size);
+					},
+				)}
 			/>
 		</div>
 	);

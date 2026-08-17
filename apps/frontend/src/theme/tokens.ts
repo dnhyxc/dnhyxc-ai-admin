@@ -3,18 +3,20 @@ import { theme } from 'antd';
 
 export type ThemeMode = 'light' | 'dark';
 
-/** 品牌色预设，可在顶栏切换 */
+/** 与 dnhyxc-ai/apps/admin 对齐：默认 indigo */
 export const colorPresets = [
-	{ key: 'teal', label: '青石', color: '#0f3d3e' },
+	{ key: 'indigo', label: '靛蓝', color: '#6366f1' },
 	{ key: 'blue', label: '霁蓝', color: '#1677ff' },
 	{ key: 'purple', label: '暮紫', color: '#722ed1' },
-	{ key: 'orange', label: '琥珀', color: '#d46b08' },
+	{ key: 'teal', label: '青石', color: '#0f3d3e' },
 ] as const;
 
 export type ColorPresetKey = (typeof colorPresets)[number]['key'];
 
 export function getPresetColor(key: ColorPresetKey): string {
-	return colorPresets.find((p) => p.key === key)?.color ?? colorPresets[0].color;
+	return (
+		colorPresets.find((p) => p.key === key)?.color ?? colorPresets[0].color
+	);
 }
 
 export function buildThemeConfig(
@@ -31,27 +33,29 @@ export function buildThemeConfig(
 			colorInfo: primaryColor,
 			borderRadius: 8,
 			fontFamily:
-				'"DM Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+				'-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
 			...(isDark
 				? {
-						colorBgLayout: '#0f1419',
-						colorBgContainer: '#161b22',
+						colorBgLayout: '#0f172a',
+						colorBgContainer: '#1e293b',
+						colorBorder: '#334155',
 					}
 				: {
-						colorBgLayout: '#f3efe6',
-						colorBgContainer: '#fffaf2',
+						colorBgLayout: '#f8fafc',
+						colorBgContainer: '#ffffff',
+						colorBorder: '#e2e8f0',
 					}),
 		},
 		components: {
 			Layout: {
-				headerBg: isDark ? '#161b22' : '#fffaf2',
-				siderBg: isDark ? '#0c1216' : '#102a2b',
-				triggerBg: isDark ? '#161b22' : '#0f3d3e',
+				headerBg: isDark ? '#1e293b' : '#ffffff',
+				siderBg: isDark ? '#020617' : '#1e293b',
 			},
-			Menu: {
-				darkItemBg: 'transparent',
-				darkSubMenuItemBg: 'transparent',
-				darkItemSelectedBg: 'rgba(255,255,255,0.12)',
+			Card: {
+				borderRadiusLG: 12,
+			},
+			Table: {
+				headerBg: isDark ? '#334155' : '#f8fafc',
 			},
 		},
 	};

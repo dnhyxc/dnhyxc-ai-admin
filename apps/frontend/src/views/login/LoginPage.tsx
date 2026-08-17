@@ -9,10 +9,10 @@ import {
 	Card,
 	Form,
 	Input,
+	message,
 	Space,
 	Tabs,
 	Typography,
-	message,
 	theme,
 } from 'antd';
 import { observer } from 'mobx-react';
@@ -118,7 +118,6 @@ export const LoginPage = observer(function LoginPage() {
 				overflow: 'hidden',
 				padding: 0,
 			}}
-			// biome-ignore lint/security/noDangerouslySetInnerHtml: captcha svg from backend
 			dangerouslySetInnerHTML={{ __html: captchaSvg }}
 		/>
 	);

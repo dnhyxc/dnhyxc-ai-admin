@@ -4,13 +4,13 @@ import {
 	Form,
 	Input,
 	InputNumber,
+	message,
 	Popconfirm,
 	Table,
-	Typography,
-	message,
 } from 'antd';
 import { observer } from 'mobx-react';
 import { useEffect, useState } from 'react';
+import { DEFAULT_PAGE_SIZE, tablePagination } from '@/lib/table-pagination';
 import { createMenuApi, deleteMenuApi, getMenusApi } from '@/service';
 import { useStore } from '@/store';
 
@@ -27,11 +27,14 @@ export const MenusPage = observer(function MenusPage() {
 	const { authStore } = useStore();
 	const canWrite = authStore.isSuperAdmin;
 	const [list, setList] = useState<MenuRow[]>([]);
+	const [pageNo, setPageNo] = useState(1);
+	const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
 	const [form] = Form.useForm();
 
 	const load = async () => {
 		const res = await getMenusApi();
 		setList(res.data as MenuRow[]);
+		setPageNo(1);
 	};
 
 	useEffect(() => {
@@ -70,10 +73,6 @@ export const MenusPage = observer(function MenusPage() {
 
 	return (
 		<div>
-			<Typography.Title level={3} style={{ marginTop: 0 }}>
-				菜单管理
-			</Typography.Title>
-
 			{canWrite && (
 				<Card size="small" title="新建菜单" style={{ marginBottom: 16 }}>
 					<Form
@@ -114,8 +113,16 @@ export const MenusPage = observer(function MenusPage() {
 			<Table
 				rowKey="id"
 				dataSource={list}
-				pagination={false}
 				columns={columns as any}
+				pagination={tablePagination(
+					list.length,
+					pageNo,
+					pageSize,
+					(page, size) => {
+						setPageNo(page);
+						setPageSize(size);
+					},
+				)}
 			/>
 		</div>
 	);

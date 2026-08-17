@@ -33,7 +33,7 @@ export default defineConfig(({ mode }) => {
 			},
 		},
 		server: {
-			port: 9003,
+			port: 9005,
 			strictPort: true,
 			proxy: {
 				'/api': {

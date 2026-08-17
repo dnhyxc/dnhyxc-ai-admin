@@ -17,6 +17,12 @@ export const API = {
 	updateMenu: '/menus/updateMenu',
 	deleteMenu: '/menus/deleteMenu',
 	logs: '/logs/getLogs',
+	deleteLog: '/logs/deleteLog',
+	deleteLogs: '/logs/deleteLogs',
 	aiUsers: '/ai-user/getUsers',
+	aiLogs: '/ai-logs/getLogs',
+	deleteAiLog: '/ai-logs/deleteLog',
+	deleteAiLogs: '/ai-logs/deleteLogs',
+	aiEbooks: '/ai-ebook/getBooks',
 	health: '/health',
 } as const;

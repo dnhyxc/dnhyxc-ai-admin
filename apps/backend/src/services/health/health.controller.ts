@@ -1,4 +1,10 @@
-import { Controller, Get, Inject, Optional, UseInterceptors } from '@nestjs/common';
+import {
+	Controller,
+	Get,
+	Inject,
+	Optional,
+	UseInterceptors,
+} from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { DB_CONNECTIONS } from '../../database/constants';

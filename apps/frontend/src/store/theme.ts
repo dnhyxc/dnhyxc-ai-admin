@@ -15,10 +15,10 @@ function readMode(): ThemeMode {
 
 function readPreset(): ColorPresetKey {
 	const v = localStorage.getItem(PRESET_KEY);
-	if (v === 'blue' || v === 'purple' || v === 'orange' || v === 'teal') {
+	if (v === 'indigo' || v === 'blue' || v === 'purple' || v === 'teal') {
 		return v;
 	}
-	return 'teal';
+	return 'indigo';
 }
 
 export class ThemeStore {
@@ -27,7 +27,7 @@ export class ThemeStore {
 
 	constructor() {
 		makeAutoObservable(this);
-		this.applyDomClass();
+		this.applyDom();
 	}
 
 	get primaryColor() {
@@ -41,7 +41,7 @@ export class ThemeStore {
 	setMode(mode: ThemeMode) {
 		this.mode = mode;
 		localStorage.setItem(MODE_KEY, mode);
-		this.applyDomClass();
+		this.applyDom();
 	}
 
 	toggleMode() {
@@ -51,10 +51,14 @@ export class ThemeStore {
 	setPreset(preset: ColorPresetKey) {
 		this.preset = preset;
 		localStorage.setItem(PRESET_KEY, preset);
+		this.applyDom();
 	}
 
-	private applyDomClass() {
-		document.documentElement.classList.toggle('dark', this.mode === 'dark');
-		document.documentElement.dataset.theme = this.mode;
+	private applyDom() {
+		const root = document.documentElement;
+		root.classList.toggle('dark', this.mode === 'dark');
+		root.dataset.theme = this.mode;
+		root.style.setProperty('--color-primary', this.primaryColor);
+		root.style.setProperty('--color-ring', this.primaryColor);
 	}
 }
