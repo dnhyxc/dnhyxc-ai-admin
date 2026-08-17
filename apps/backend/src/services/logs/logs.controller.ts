@@ -48,7 +48,7 @@ class DeleteLogsDto {
 
 @Controller('logs')
 @UseGuards(JwtGuard, RoleGuard)
-@Roles(Role.ADMIN, Role.USER)
+@Roles(Role.ADMIN)
 @UseInterceptors(ResponseInterceptor)
 export class LogsController {
 	constructor(private readonly logsService: LogsService) {}

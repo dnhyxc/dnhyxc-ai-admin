@@ -24,7 +24,7 @@ import { UserService } from './user.service';
 
 @Controller('user')
 @UseGuards(JwtGuard, RoleGuard)
-@Roles(Role.ADMIN, Role.USER)
+@Roles(Role.ADMIN)
 @UseInterceptors(ClassSerializerInterceptor, ResponseInterceptor)
 export class UserController {
 	constructor(private readonly userService: UserService) {}

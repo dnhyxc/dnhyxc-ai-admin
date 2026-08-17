@@ -1,8 +1,14 @@
-import { Injectable, ServiceUnavailableException } from '@nestjs/common';
+import {
+	BadRequestException,
+	Injectable,
+	ServiceUnavailableException,
+} from '@nestjs/common';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Like, Repository } from 'typeorm';
 import { DB_CONNECTIONS } from '../../database/constants';
+import { UserService } from '../user/user.service';
 import { AiUser } from './ai-user.entity';
+import { BindAiUserDTO } from './dto/bind-ai-user.dto';
 
 @Injectable()
 export class AiUserService {
@@ -11,6 +17,7 @@ export class AiUserService {
 		private readonly aiUserRepository: Repository<AiUser>,
 		@InjectDataSource(DB_CONNECTIONS.AI)
 		private readonly aiDataSource: DataSource,
+		private readonly userService: UserService,
 	) {}
 
 	private assertReady() {
@@ -19,6 +26,62 @@ export class AiUserService {
 				'AI 业务库未连接，请确认 dnhyxc-ai MySQL 已启动且 AI_DB_* 配置正确',
 			);
 		}
+	}
+
+	findByUsername(username: string): Promise<AiUser | null> {
+		this.assertReady();
+		return this.aiUserRepository.findOne({
+			where: { username },
+			select: {
+				id: true,
+				username: true,
+				email: true,
+				createTime: true,
+				isMember: true,
+				membershipType: true,
+				memberExpiresAt: true,
+			},
+		});
+	}
+
+	/**
+	 * 普通用户自助绑定前台账号：用户名 + 邮箱须与前台账号一致。
+	 * 绑定后书籍等数据按 aiUserId（前台 user.id）过滤。
+	 */
+	async bindForAdminUser(adminUserId: number, dto: BindAiUserDTO) {
+		this.assertReady();
+		const adminUser = await this.userService.findOne(adminUserId);
+		if (!adminUser) {
+			throw new BadRequestException('用户不存在');
+		}
+
+		const aiUser = await this.findByUsername(dto.username.trim());
+		if (!aiUser) {
+			throw new BadRequestException('前台账号不存在，请检查用户名');
+		}
+		if (aiUser.email.toLowerCase() !== dto.email.trim().toLowerCase()) {
+			throw new BadRequestException('前台用户名与邮箱不匹配');
+		}
+
+		const occupied = await this.userService.findByAiUserId(
+			aiUser.id,
+			adminUserId,
+		);
+		if (occupied) {
+			throw new BadRequestException('该前台账号已被其他后台用户绑定');
+		}
+
+		await this.userService.update(adminUserId, { aiUserId: aiUser.id });
+		const updated = await this.userService.findOne(adminUserId);
+		if (!updated) {
+			throw new BadRequestException('绑定失败');
+		}
+		const { password: _, ...userInfo } = updated;
+		return {
+			ok: true,
+			aiUsername: aiUser.username,
+			...userInfo,
+		};
 	}
 
 	async findAll(query: {

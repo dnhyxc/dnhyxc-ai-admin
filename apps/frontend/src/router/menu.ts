@@ -66,6 +66,7 @@ function flattenLeaves(): MenuLeaf[] {
 
 export function resolveMenuLabel(pathname: string) {
 	if (pathname === '/') return '仪表盘';
+	if (pathname.startsWith('/profile')) return '个人中心';
 	return (
 		flattenLeaves().find((m) => m.path !== '/' && pathname.startsWith(m.path))
 			?.label || '仪表盘'
@@ -83,4 +84,61 @@ export function resolveActiveGroupKey(pathname: string): string | null {
 		}
 	}
 	return null;
+}
+
+/** 从角色菜单收集可访问 path */
+export function collectAllowedPaths(
+	roles?: Array<{ menus?: Array<{ path?: string }> }>,
+): Set<string> {
+	const paths = new Set<string>();
+	for (const role of roles || []) {
+		for (const menu of role.menus || []) {
+			if (menu.path) paths.add(menu.path);
+		}
+	}
+	return paths;
+}
+
+/** 按角色菜单过滤侧栏；超管不过滤 */
+export function filterMenuItems(
+	items: MenuEntry[],
+	opts: { isSuperAdmin: boolean; allowedPaths: Set<string> },
+): MenuEntry[] {
+	if (opts.isSuperAdmin) return items;
+	const result: MenuEntry[] = [];
+	for (const item of items) {
+		if ('children' in item && item.children) {
+			const children = item.children.filter((c) =>
+				opts.allowedPaths.has(c.path),
+			);
+			if (children.length) {
+				result.push({ ...item, children });
+			}
+		} else if ('path' in item && opts.allowedPaths.has(item.path)) {
+			result.push(item);
+		}
+	}
+	return result;
+}
+
+export function canAccessPath(
+	pathname: string,
+	opts: { isSuperAdmin: boolean; allowedPaths: Set<string> },
+) {
+	if (opts.isSuperAdmin) return true;
+	if (pathname === '/profile' || pathname.startsWith('/profile/')) return true;
+	if (pathname === '/') return opts.allowedPaths.has('/');
+	return [...opts.allowedPaths].some(
+		(p) => p !== '/' && pathname.startsWith(p),
+	);
+}
+
+/** 登录后首页：超管进仪表盘，普通用户进首个有权限菜单 */
+export function resolveHomePath(opts: {
+	isSuperAdmin: boolean;
+	roles?: Array<{ menus?: Array<{ path?: string }> }>;
+}) {
+	if (opts.isSuperAdmin) return '/';
+	const paths = collectAllowedPaths(opts.roles);
+	return [...paths][0] || '/ai-ebooks';
 }

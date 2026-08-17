@@ -11,6 +11,7 @@ import { AuthModule } from './services/auth/auth.module';
 import { DashboardModule } from './services/dashboard/dashboard.module';
 import { HealthModule } from './services/health/health.module';
 import { LogsModule } from './services/logs/logs.module';
+import { MailModule } from './services/mail/mail.module';
 import { MenusModule } from './services/menus/menus.module';
 import { RolesModule } from './services/roles/roles.module';
 import { SeedModule } from './services/seed/seed.module';
@@ -29,6 +30,7 @@ import { UserModule } from './services/user/user.module';
 		UserModule,
 		RolesModule,
 		MenusModule,
+		MailModule,
 		AuthModule,
 		SeedModule,
 		HealthModule,

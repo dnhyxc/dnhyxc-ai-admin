@@ -1,7 +1,9 @@
 import { Alert, Button, Input, Space, Table, Tag, Typography } from 'antd';
+import { observer } from 'mobx-react';
 import { useEffect, useState } from 'react';
 import { DEFAULT_PAGE_SIZE, tablePagination } from '@/lib/table-pagination';
 import { getAiEbooksApi } from '@/service';
+import { useStore } from '@/store';
 
 type AiEbookRow = {
 	id: string;
@@ -37,7 +39,9 @@ function formatTime(v?: string) {
 	return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`;
 }
 
-export function AiEbooksPage() {
+export const AiEbooksPage = observer(function AiEbooksPage() {
+	const { authStore } = useStore();
+	const isAdmin = authStore.isSuperAdmin;
 	const [list, setList] = useState<AiEbookRow[]>([]);
 	const [total, setTotal] = useState(0);
 	const [pageNo, setPageNo] = useState(1);
@@ -53,7 +57,7 @@ export function AiEbooksPage() {
 				pageNo: page,
 				pageSize: size,
 				title: title || undefined,
-				username: username || undefined,
+				username: isAdmin ? username || undefined : undefined,
 			});
 			const data = res.data as { list: AiEbookRow[]; total: number };
 			setList(data.list);
@@ -86,7 +90,11 @@ export function AiEbooksPage() {
 				}}
 			>
 				<Typography.Text type="secondary">
-					读取 dnhyxc-ai 业务库 ebook_book · 共 {total} 本
+					{isAdmin
+						? `读取 dnhyxc-ai 业务库 ebook_book · 共 ${total} 本`
+						: authStore.userInfo?.aiUserId
+							? `仅显示关联前台账号的书籍 · 共 ${total} 本`
+							: '尚未绑定前台账号'}
 				</Typography.Text>
 				<Space wrap>
 					<Input
@@ -96,13 +104,15 @@ export function AiEbooksPage() {
 						style={{ width: 180 }}
 						allowClear
 					/>
-					<Input
-						placeholder="用户名"
-						value={username}
-						onChange={(e) => setUsername(e.target.value)}
-						style={{ width: 160 }}
-						allowClear
-					/>
+					{isAdmin && (
+						<Input
+							placeholder="用户名"
+							value={username}
+							onChange={(e) => setUsername(e.target.value)}
+							style={{ width: 160 }}
+							allowClear
+						/>
+					)}
 					<Button type="primary" onClick={() => load(1, pageSize)}>
 						查询
 					</Button>
@@ -186,4 +196,4 @@ export function AiEbooksPage() {
 			/>
 		</div>
 	);
-}
+});

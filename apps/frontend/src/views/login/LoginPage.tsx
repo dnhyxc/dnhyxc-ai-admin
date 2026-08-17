@@ -18,6 +18,7 @@ import {
 import { observer } from 'mobx-react';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
+import { resolveHomePath } from '@/router/menu';
 import { captchaApi, loginApi, registerApi } from '@/service';
 import { useStore } from '@/store';
 
@@ -34,6 +35,20 @@ export const LoginPage = observer(function LoginPage() {
 	const [captchaSvg, setCaptchaSvg] = useState('');
 	const [loading, setLoading] = useState(false);
 
+	const goAfterAuth = () => {
+		if (authStore.needsAiBind) {
+			navigate('/bind-ai-user', { replace: true });
+			return;
+		}
+		navigate(
+			resolveHomePath({
+				isSuperAdmin: authStore.isSuperAdmin,
+				roles: authStore.userInfo?.roles,
+			}),
+			{ replace: true },
+		);
+	};
+
 	const loadCaptcha = async () => {
 		const res = await captchaApi();
 		const data = res.data as { captchaId: string; captchaSvg: string };
@@ -43,7 +58,7 @@ export const LoginPage = observer(function LoginPage() {
 
 	useEffect(() => {
 		if (authStore.isAuthed) {
-			navigate('/', { replace: true });
+			goAfterAuth();
 			return;
 		}
 		loadCaptcha().catch(() => message.error('验证码加载失败'));
@@ -65,7 +80,7 @@ export const LoginPage = observer(function LoginPage() {
 			const res = await loginApi({ ...values, captchaId });
 			authStore.setSession(res.data as any);
 			message.success('登录成功');
-			navigate('/', { replace: true });
+			goAfterAuth();
 		} catch {
 			refreshCaptcha();
 		} finally {
@@ -171,7 +186,6 @@ export const LoginPage = observer(function LoginPage() {
 									form={loginForm}
 									layout="vertical"
 									onFinish={onLogin}
-									initialValues={{ username: 'admin', password: 'admin123' }}
 									requiredMark={false}
 								>
 									<Form.Item
@@ -183,6 +197,7 @@ export const LoginPage = observer(function LoginPage() {
 											prefix={<UserOutlined />}
 											autoComplete="username"
 											size="large"
+											placeholder="请输入用户名"
 										/>
 									</Form.Item>
 									<Form.Item
@@ -194,6 +209,7 @@ export const LoginPage = observer(function LoginPage() {
 											prefix={<LockOutlined />}
 											autoComplete="current-password"
 											size="large"
+											placeholder="请输入密码"
 										/>
 									</Form.Item>
 									<Form.Item
@@ -206,6 +222,7 @@ export const LoginPage = observer(function LoginPage() {
 												prefix={<SafetyOutlined />}
 												size="large"
 												style={{ flex: 1 }}
+												placeholder="请输入验证码"
 											/>
 											{captchaAddon}
 										</Space.Compact>
@@ -244,6 +261,7 @@ export const LoginPage = observer(function LoginPage() {
 											prefix={<UserOutlined />}
 											autoComplete="username"
 											size="large"
+											placeholder="请输入用户名"
 										/>
 									</Form.Item>
 									<Form.Item
@@ -258,6 +276,7 @@ export const LoginPage = observer(function LoginPage() {
 											prefix={<MailOutlined />}
 											autoComplete="email"
 											size="large"
+											placeholder="请输入邮箱"
 										/>
 									</Form.Item>
 									<Form.Item
@@ -272,6 +291,7 @@ export const LoginPage = observer(function LoginPage() {
 											prefix={<LockOutlined />}
 											autoComplete="new-password"
 											size="large"
+											placeholder="请输入密码"
 										/>
 									</Form.Item>
 									<Form.Item
@@ -296,6 +316,7 @@ export const LoginPage = observer(function LoginPage() {
 											prefix={<LockOutlined />}
 											autoComplete="new-password"
 											size="large"
+											placeholder="请再次输入密码"
 										/>
 									</Form.Item>
 									<Form.Item
@@ -308,6 +329,7 @@ export const LoginPage = observer(function LoginPage() {
 												prefix={<SafetyOutlined />}
 												size="large"
 												style={{ flex: 1 }}
+												placeholder="请输入验证码"
 											/>
 											{captchaAddon}
 										</Space.Compact>

@@ -26,6 +26,7 @@
 	"dependencies": {
 		"@casl/ability": "^6.7.5",
 		"@keyv/redis": "^5.1.5",
+		"@nestjs-modules/mailer": "^2.0.2",
 		"@nestjs/cache-manager": "^3.1.0",
 		"@nestjs/common": "^11.1.11",
 		"@nestjs/config": "^4.0.2",
@@ -46,6 +47,7 @@
 		"keyv": "^5.5.5",
 		"mysql2": "^3.16.0",
 		"nest-winston": "^1.10.2",
+		"nodemailer": "^9.0.5",
 		"passport": "^0.7.0",
 		"passport-jwt": "^4.0.1",
 		"reflect-metadata": "^0.2.2",
@@ -63,6 +65,7 @@
 		"@types/bcrypt": "^6.0.0",
 		"@types/express": "^5.0.0",
 		"@types/node": "^22.10.7",
+		"@types/nodemailer": "^8.0.1",
 		"@types/passport-jwt": "^4.0.1",
 		"cross-env": "^10.1.0",
 		"ts-node": "^10.9.2",

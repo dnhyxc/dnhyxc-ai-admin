@@ -1,13 +1,8 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { SeedEnum } from '../../enum/config.enum';
-import { hashPassword } from '../../utils';
 import { Menus } from '../menus/menus.entity';
 import { Roles } from '../roles/roles.entity';
-import { Profile } from '../user/profile.entity';
-import { User } from '../user/user.entity';
 
 const DEFAULT_MENUS = [
 	{
@@ -22,37 +17,44 @@ const DEFAULT_MENUS = [
 	{ name: '菜单管理', path: '/menus', order: 4, acl: 'menus', icon: 'Menu' },
 	{ name: 'AI 用户', path: '/ai-users', order: 5, acl: 'ai-user', icon: 'Bot' },
 	{
+		name: '书籍列表',
+		path: '/ai-ebooks',
+		order: 6,
+		acl: 'ai-ebook',
+		icon: 'BookOpen',
+	},
+	{
 		name: 'AI 日志',
 		path: '/ai-logs',
-		order: 6,
+		order: 7,
 		acl: 'ai-logs',
 		icon: 'FileText',
 	},
 	{
 		name: '后台日志',
 		path: '/logs',
-		order: 7,
+		order: 8,
 		acl: 'logs',
 		icon: 'ScrollText',
 	},
 ];
+
+/** 普通用户默认可见菜单 path */
+const USER_MENU_PATHS = ['/ai-ebooks'];
 
 @Injectable()
 export class SeedService implements OnModuleInit {
 	private readonly logger = new Logger(SeedService.name);
 
 	constructor(
-		@InjectRepository(User) private readonly userRepo: Repository<User>,
 		@InjectRepository(Roles) private readonly rolesRepo: Repository<Roles>,
 		@InjectRepository(Menus) private readonly menusRepo: Repository<Menus>,
-		@InjectRepository(Profile)
-		private readonly profileRepo: Repository<Profile>,
-		private readonly configService: ConfigService,
 	) {}
 
 	async onModuleInit() {
 		await this.ensureMenus();
-		await this.ensureAdminRoleAndUser();
+		await this.ensureAdminRole();
+		await this.ensureUserRole();
 	}
 
 	private async ensureMenus() {
@@ -62,8 +64,12 @@ export class SeedService implements OnModuleInit {
 				where: { path: item.path },
 			});
 			if (exists) {
-				// 已有库同步展示名（操作日志 → 后台日志）
-				if (exists.name !== item.name || exists.order !== item.order) {
+				if (
+					exists.name !== item.name ||
+					exists.order !== item.order ||
+					exists.acl !== item.acl ||
+					exists.icon !== item.icon
+				) {
 					exists.name = item.name;
 					exists.order = item.order;
 					exists.acl = item.acl;
@@ -78,7 +84,8 @@ export class SeedService implements OnModuleInit {
 		if (added) this.logger.log(`已补种 ${added} 条菜单`);
 	}
 
-	private async ensureAdminRoleAndUser() {
+	/** 仅种子超级管理员角色与菜单绑定，不创建默认登录账号 */
+	private async ensureAdminRole() {
 		let adminRole = await this.rolesRepo.findOne({
 			where: { id: 1 },
 			relations: ['menus'],
@@ -103,30 +110,46 @@ export class SeedService implements OnModuleInit {
 				await this.rolesRepo.save(adminRole);
 			}
 		}
+	}
 
-		const userCount = await this.userRepo.count();
-		if (userCount > 0) return;
+	/** 普通用户：仅「书籍列表」菜单 */
+	private async ensureUserRole() {
+		const userMenus = await this.menusRepo
+			.createQueryBuilder('m')
+			.where('m.path IN (:...paths)', { paths: USER_MENU_PATHS })
+			.getMany();
 
-		const username =
-			this.configService.get(SeedEnum.SEED_ADMIN_USERNAME) || 'admin';
-		const password =
-			this.configService.get(SeedEnum.SEED_ADMIN_PASSWORD) || 'admin123';
-		const email =
-			this.configService.get(SeedEnum.SEED_ADMIN_EMAIL) || 'admin@dnhyxc.cn';
+		let userRole =
+			(await this.rolesRepo.findOne({
+				where: { id: 2 },
+				relations: ['menus'],
+			})) ||
+			(await this.rolesRepo.findOne({
+				where: { name: '普通用户' },
+				relations: ['menus'],
+			}));
 
-		const user = this.userRepo.create({
-			username,
-			email,
-			password: await hashPassword(password),
-			isActive: true,
-			roles: [adminRole],
-			profile: this.profileRepo.create({
-				gender: 0,
-				avatar: '',
-				address: '',
-			}),
-		});
-		await this.userRepo.save(user);
-		this.logger.log(`已种子管理员账号: ${username} / ${password}`);
+		if (!userRole) {
+			userRole = await this.rolesRepo.save(
+				this.rolesRepo.create({
+					name: '普通用户',
+					description: '仅可查看关联前台账号的书籍列表',
+					menus: userMenus,
+				}),
+			);
+			this.logger.log('已种子普通用户角色');
+			return;
+		}
+
+		const want = new Set(userMenus.map((m) => m.id));
+		const have = new Set((userRole.menus || []).map((m) => m.id));
+		const same =
+			want.size === have.size && [...want].every((id) => have.has(id));
+		if (!same) {
+			userRole.menus = userMenus;
+			userRole.description = '仅可查看关联前台账号的书籍列表';
+			await this.rolesRepo.save(userRole);
+			this.logger.log('已同步普通用户角色菜单');
+		}
 	}
 }

@@ -18,6 +18,20 @@ export const registerApi = (data: {
 
 export const captchaApi = () => http.post(API.captcha, { data: {} });
 
+export const changePasswordApi = (data: {
+	email: string;
+	verifyCode: number;
+	verifyCodeKey: string;
+	oldPassword: string;
+	newPassword: string;
+}) => http.post(API.changePassword, { data });
+
+export const sendChangePasswordCodeApi = (data: { email: string }) =>
+	http.post<{ key: string }>(API.sendChangePasswordCode, { data });
+
+export const bindAiUserApi = (data: { username: string; email: string }) =>
+	http.post(API.bindAiUser, { data });
+
 export const profileApi = () => http.get(API.profile);
 
 export const overviewApi = () => http.get(API.overview);

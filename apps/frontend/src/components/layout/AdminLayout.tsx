@@ -25,6 +25,9 @@ import {
 } from '@/components/ui';
 import { cn } from '@/lib/utils';
 import {
+	canAccessPath,
+	collectAllowedPaths,
+	filterMenuItems,
 	menuItems,
 	resolveActiveGroupKey,
 	resolveMenuLabel,
@@ -42,6 +45,12 @@ export const AdminLayout = observer(function AdminLayout() {
 	const navigate = useNavigate();
 	const { authStore, themeStore } = useStore();
 
+	const allowedPaths = collectAllowedPaths(authStore.userInfo?.roles);
+	const allowedPathKey = [...allowedPaths].sort().join(',');
+	const visibleMenus = filterMenuItems(menuItems, {
+		isSuperAdmin: authStore.isSuperAdmin,
+		allowedPaths,
+	});
 	const pageTitle = resolveMenuLabel(location.pathname);
 	const activeGroup = resolveActiveGroupKey(location.pathname);
 
@@ -52,6 +61,20 @@ export const AdminLayout = observer(function AdminLayout() {
 			);
 		}
 	}, [activeGroup]);
+
+	useEffect(() => {
+		const paths = new Set(allowedPathKey ? allowedPathKey.split(',') : []);
+		if (
+			canAccessPath(location.pathname, {
+				isSuperAdmin: authStore.isSuperAdmin,
+				allowedPaths: paths,
+			})
+		) {
+			return;
+		}
+		const fallback = [...paths][0] || '/login';
+		navigate(fallback, { replace: true });
+	}, [location.pathname, authStore.isSuperAdmin, allowedPathKey, navigate]);
 
 	const toggleGroup = (key: string) => {
 		setOpenGroups((prev) => ({ ...prev, [key]: !prev[key] }));
@@ -86,7 +109,7 @@ export const AdminLayout = observer(function AdminLayout() {
 
 				<ScrollArea className="flex-1 py-2">
 					<nav className="space-y-1 px-2">
-						{menuItems.map((item) => {
+						{visibleMenus.map((item) => {
 							if ('children' in item && item.children) {
 								const GroupIcon = item.icon;
 								const opened = !!openGroups[item.key];
@@ -287,9 +310,9 @@ export const AdminLayout = observer(function AdminLayout() {
 									</div>
 								</DropdownMenuLabel>
 								<DropdownMenuSeparator />
-								<DropdownMenuItem disabled>
+								<DropdownMenuItem onClick={() => navigate('/profile')}>
 									<UserIcon size={16} className="mr-2" />
-									个人信息
+									个人中心
 								</DropdownMenuItem>
 								<DropdownMenuSeparator />
 								<DropdownMenuItem

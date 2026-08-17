@@ -8,7 +8,7 @@ import { DashboardService } from './dashboard.service';
 
 @Controller('dashboard')
 @UseGuards(JwtGuard, RoleGuard)
-@Roles(Role.ADMIN, Role.USER)
+@Roles(Role.ADMIN)
 @UseInterceptors(ResponseInterceptor)
 export class DashboardController {
 	constructor(private readonly dashboardService: DashboardService) {}

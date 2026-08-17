@@ -21,7 +21,7 @@ import { MenusService } from './menus.service';
 
 @Controller('menus')
 @UseGuards(JwtGuard, RoleGuard)
-@Roles(Role.ADMIN, Role.USER)
+@Roles(Role.ADMIN)
 @UseInterceptors(ResponseInterceptor)
 export class MenusController {
 	constructor(private readonly menusService: MenusService) {}

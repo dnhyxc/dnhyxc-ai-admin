@@ -8,7 +8,9 @@ import {
 	TrendingUp,
 	Users,
 } from 'lucide-react';
+import { observer } from 'mobx-react';
 import { useEffect, useState } from 'react';
+import { Navigate } from 'react-router';
 import {
 	Bar,
 	BarChart,
@@ -32,7 +34,9 @@ import {
 	CardTitle,
 } from '@/components/ui';
 import { formatNumber } from '@/lib/utils';
+import { resolveHomePath } from '@/router/menu';
 import { overviewApi } from '@/service';
+import { useStore } from '@/store';
 import type { DashboardStats } from '@/types/dashboard';
 
 const COLORS = ['#6366f1', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981'];
@@ -112,18 +116,35 @@ const statCards: {
 	},
 ];
 
-export function DashboardPage() {
+export const DashboardPage = observer(function DashboardPage() {
+	const { authStore } = useStore();
 	const [stats, setStats] = useState<DashboardStats>(emptyStats);
 	const [loading, setLoading] = useState(true);
 
 	useEffect(() => {
+		if (!authStore.isSuperAdmin) {
+			setLoading(false);
+			return;
+		}
 		overviewApi()
 			.then((res) =>
 				setStats({ ...emptyStats, ...(res.data as DashboardStats) }),
 			)
 			.catch(() => {})
 			.finally(() => setLoading(false));
-	}, []);
+	}, [authStore.isSuperAdmin]);
+
+	if (!authStore.isSuperAdmin) {
+		return (
+			<Navigate
+				to={resolveHomePath({
+					isSuperAdmin: false,
+					roles: authStore.userInfo?.roles,
+				})}
+				replace
+			/>
+		);
+	}
 
 	return (
 		<div className="space-y-6">
@@ -324,4 +345,4 @@ export function DashboardPage() {
 			</div>
 		</div>
 	);
-}
+});

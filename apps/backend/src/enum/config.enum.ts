@@ -33,8 +33,8 @@ export enum RedisEnum {
 	REDIS_USERNAME = 'REDIS_USERNAME',
 }
 
-export enum SeedEnum {
-	SEED_ADMIN_USERNAME = 'SEED_ADMIN_USERNAME',
-	SEED_ADMIN_PASSWORD = 'SEED_ADMIN_PASSWORD',
-	SEED_ADMIN_EMAIL = 'SEED_ADMIN_EMAIL',
+/** 邮件（与 dnhyxc-ai 一致） */
+export enum EmailEnum {
+	EMAIL_TRANSPORT = 'EMAIL_TRANSPORT',
+	EMAIL_FROM = 'EMAIL_FROM',
 }

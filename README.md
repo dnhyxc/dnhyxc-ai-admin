@@ -47,10 +47,7 @@ pnpm server:dev      # http://localhost:9113/api-docs
 pnpm dev:frontend    # http://localhost:9003
 ```
 
-默认管理员（首次启动自动种子）：
-
-- 用户名：`admin`
-- 密码：`admin123`
+默认无预设管理员账号，请先在登录页「注册」创建；首个注册用户自动成为超级管理员。
 
 > AI 业务库需自行启动 `dnhyxc-ai` 的 `docker compose`（默认 `3090`）。未就绪时后台仍可独立运行，仅「AI 用户」相关接口不可用。
 

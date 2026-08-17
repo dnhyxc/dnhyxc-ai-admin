@@ -4,7 +4,7 @@ import {
 	NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, Like, Repository } from 'typeorm';
+import { In, Like, Not, Repository } from 'typeorm';
 import { hashPassword } from '../../utils';
 import { Logs } from '../logs/logs.entity';
 import { Roles } from '../roles/roles.entity';
@@ -37,6 +37,7 @@ export class UserService {
 				username: true,
 				email: true,
 				isActive: true,
+				aiUserId: true,
 				createTime: true,
 				updateTime: true,
 			},
@@ -101,6 +102,7 @@ export class UserService {
 		if (dto.email) user.email = dto.email;
 		if (typeof dto.isActive === 'boolean') user.isActive = dto.isActive;
 		if (dto.password) user.password = await hashPassword(dto.password);
+		if (dto.aiUserId !== undefined) user.aiUserId = dto.aiUserId;
 		if (dto.roleIds !== undefined) {
 			user.roles = dto.roleIds.length
 				? await this.rolesRepository.findBy({ id: In(dto.roleIds) })
@@ -144,5 +146,17 @@ export class UserService {
 
 	count(): Promise<number> {
 		return this.userRepository.count();
+	}
+
+	/** 查找已绑定该前台账号的后台用户（可排除自身） */
+	findByAiUserId(
+		aiUserId: number,
+		excludeUserId?: number,
+	): Promise<User | null> {
+		return this.userRepository.findOne({
+			where: excludeUserId
+				? { aiUserId, id: Not(excludeUserId) }
+				: { aiUserId },
+		});
 	}
 }

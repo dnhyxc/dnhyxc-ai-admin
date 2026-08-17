@@ -24,6 +24,7 @@ type UserRow = {
 	username: string;
 	email: string;
 	isActive: boolean;
+	aiUserId?: number | null;
 	roles?: Array<{ id: number; name: string }>;
 };
 
@@ -92,6 +93,16 @@ export const UsersPage = observer(function UsersPage() {
 					/>
 				) : (
 					r.roles?.map((x) => x.name).join('、') || '—'
+				),
+		},
+		{
+			title: '前台账号',
+			width: 120,
+			render: (_: unknown, r: UserRow) =>
+				r.aiUserId != null ? (
+					<Tag color="blue">#{r.aiUserId}</Tag>
+				) : (
+					<Tag>未绑定</Tag>
 				),
 		},
 		{

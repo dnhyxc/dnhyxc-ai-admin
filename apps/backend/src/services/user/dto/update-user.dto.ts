@@ -7,6 +7,7 @@ import {
 	IsOptional,
 	IsString,
 	Length,
+	ValidateIf,
 } from 'class-validator';
 
 export class UpdateUserDTO {
@@ -30,4 +31,15 @@ export class UpdateUserDTO {
 	@IsArray()
 	@IsInt({ each: true })
 	roleIds?: number[];
+
+	/** 传 null 可清空关联 */
+	@IsOptional()
+	@Transform(({ value }) => {
+		if (value === '' || value === undefined) return undefined;
+		if (value === null) return null;
+		return Number(value);
+	})
+	@ValidateIf((_, v) => v !== null && v !== undefined)
+	@IsInt({ message: '前台用户 id 必须为整数' })
+	aiUserId?: number | null;
 }

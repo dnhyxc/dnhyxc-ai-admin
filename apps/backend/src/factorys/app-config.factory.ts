@@ -41,9 +41,8 @@ export const appConfig = () => ({
 		REDIS_URL: Joi.string().uri().optional().allow(''),
 		REDIS_PASSWORD: Joi.string().optional().allow(''),
 		REDIS_USERNAME: Joi.string().optional().allow(''),
-		SEED_ADMIN_USERNAME: Joi.string().default('admin'),
-		SEED_ADMIN_PASSWORD: Joi.string().default('admin123'),
-		SEED_ADMIN_EMAIL: Joi.string().email().default('admin@dnhyxc.cn'),
+		EMAIL_TRANSPORT: Joi.string().required(),
+		EMAIL_FROM: Joi.string().email().required(),
 	}),
 });
 

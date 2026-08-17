@@ -26,8 +26,16 @@ export class AiEbookService {
 		pageSize?: number;
 		title?: string;
 		username?: string;
+		/** 普通用户：仅查该前台用户的书；未绑定传 null 返回空 */
+		scopeAiUserId?: number | null;
 	}) {
 		this.assertReady();
+
+		// 普通用户未关联前台账号：直接空结果
+		if (query.scopeAiUserId === null) {
+			return { list: [], total: 0 };
+		}
+
 		const pageNo = query.pageNo || 1;
 		const pageSize = query.pageSize || 20;
 
@@ -40,6 +48,11 @@ export class AiEbookService {
 			.take(pageSize)
 			.skip((pageNo - 1) * pageSize);
 
+		if (query.scopeAiUserId != null) {
+			qb.andWhere('book.userId = :aiUserId', {
+				aiUserId: query.scopeAiUserId,
+			});
+		}
 		if (query.title) {
 			qb.andWhere('book.title LIKE :title', { title: `%${query.title}%` });
 		}
