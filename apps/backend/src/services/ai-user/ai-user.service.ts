@@ -4,7 +4,7 @@ import {
 	ServiceUnavailableException,
 } from '@nestjs/common';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
-import { DataSource, Like, Repository } from 'typeorm';
+import { DataSource, Like, MoreThanOrEqual, Repository } from 'typeorm';
 import { DB_CONNECTIONS } from '../../database/constants';
 import { UserService } from '../user/user.service';
 import { AiUser } from './ai-user.entity';
@@ -145,13 +145,16 @@ export class AiUserService {
 			}
 		};
 
+		const sevenDaysAgo = new Date();
+		sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
 		const [
 			activeUsersToday,
 			totalEbooks,
 			totalChats,
 			totalRevenue,
 			newUsersThisWeek,
-			growthRows,
+			recentUsers,
 			memberRows,
 			moduleRows,
 		] = await Promise.all([
@@ -159,7 +162,6 @@ export class AiUserService {
 				`SELECT COUNT(DISTINCT userId) AS c FROM logs
          WHERE userId IS NOT NULL AND createTime >= CURDATE()`,
 			),
-			// 与书籍列表一致：只统计主书，排除读者副本
 			scalar(
 				'SELECT COUNT(*) AS c FROM ebook_book WHERE source_book_id IS NULL',
 			),
@@ -169,15 +171,15 @@ export class AiUserService {
 				`SELECT COUNT(*) AS c FROM user
          WHERE createTime >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)`,
 			),
-			ds
-				.query(
-					`SELECT DATE_FORMAT(createTime, '%m-%d') AS date, COUNT(*) AS count
-           FROM user
-           WHERE createTime >= DATE_SUB(CURDATE(), INTERVAL 6 DAY)
-           GROUP BY DATE(createTime)
-           ORDER BY DATE(createTime)`,
-				)
-				.catch(() => []),
+			this.aiUserRepository
+				.find({
+					where: { createTime: MoreThanOrEqual(sevenDaysAgo) },
+					select: { createTime: true },
+				})
+				.catch((err) => {
+					console.error('[AiUserService] recentUsers query failed:', err);
+					return [];
+				}),
 			ds
 				.query(
 					`SELECT
@@ -221,14 +223,32 @@ export class AiUserService {
 			totalChats,
 			totalRevenue,
 			newUsersThisWeek,
-			usersGrowth: (growthRows as any[]).map((r) => ({
-				date: String(r.date),
-				count: Number(r.count) || 0,
-			})),
-			membershipDistribution: (memberRows as any[]).map((r) => ({
-				name: String(r.name),
-				value: Number(r.value) || 0,
-			})),
+			usersGrowth: (() => {
+				const growthMap = new Map<string, number>();
+				for (const user of recentUsers as AiUser[]) {
+					if (!user.createTime) continue;
+					const d = new Date(user.createTime);
+					const mm = String(d.getMonth() + 1).padStart(2, '0');
+					const dd = String(d.getDate()).padStart(2, '0');
+					const key = `${mm}-${dd}`;
+					growthMap.set(key, (growthMap.get(key) || 0) + 1);
+				}
+				return Array.from(growthMap.entries())
+					.map(([date, count]) => ({ date, count }))
+					.sort((a, b) => a.date.localeCompare(b.date));
+			})(),
+			membershipDistribution: (memberRows as any[]).map((r) => {
+				const rawName = String(r.name);
+				const nameMap: Record<string, string> = {
+					premium: '高级会员',
+					basic: '基础会员',
+					vip: 'VIP会员',
+					svip: 'SVIP会员',
+					trial: '试用会员',
+				};
+				const name = nameMap[rawName] ?? rawName;
+				return { name, value: Number(r.value) || 0 };
+			}),
 			moduleUsage: (moduleRows as any[]).map((r) => ({
 				name: String(r.name),
 				count: Number(r.count) || 0,

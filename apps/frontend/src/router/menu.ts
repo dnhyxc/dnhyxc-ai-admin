@@ -111,9 +111,7 @@ export function filterMenuItems(
 			const children = item.children.filter((c) =>
 				opts.allowedPaths.has(c.path),
 			);
-			if (children.length) {
-				result.push({ ...item, children });
-			}
+			result.push(...children);
 		} else if ('path' in item && opts.allowedPaths.has(item.path)) {
 			result.push(item);
 		}

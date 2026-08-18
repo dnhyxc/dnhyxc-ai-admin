@@ -94,7 +94,7 @@ export const ProfilePage = observer(function ProfilePage() {
 	};
 
 	return (
-		<div className="mx-auto flex max-w-2xl flex-col gap-6">
+		<div className="mx-auto flex w-full max-w-xl flex-col gap-6">
 			<Card>
 				<CardHeader>
 					<CardTitle>账号信息</CardTitle>
@@ -128,7 +128,7 @@ export const ProfilePage = observer(function ProfilePage() {
 						form={form}
 						layout="vertical"
 						onFinish={onFinish}
-						className="max-w-md"
+						className="w-full"
 						initialValues={{ email: user?.email }}
 					>
 						<Form.Item

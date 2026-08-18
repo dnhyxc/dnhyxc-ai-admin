@@ -1,7 +1,9 @@
 import { Alert, Button, Input, Space, Table, Tag, Typography } from 'antd';
+import { observer } from 'mobx-react';
 import { useEffect, useState } from 'react';
 import { DEFAULT_PAGE_SIZE, tablePagination } from '@/lib/table-pagination';
 import { getAiUsersApi } from '@/service';
+import { useStore } from '@/store';
 
 type AiUser = {
 	id: number;
@@ -14,7 +16,8 @@ type AiUser = {
 	roles?: Array<{ id: number; name: string }>;
 };
 
-export function AiUsersPage() {
+export const AiUsersPage = observer(function AiUsersPage() {
+	const { themeStore } = useStore();
 	const [list, setList] = useState<AiUser[]>([]);
 	const [total, setTotal] = useState(0);
 	const [pageNo, setPageNo] = useState(1);
@@ -114,7 +117,26 @@ export function AiUsersPage() {
 						render: (v: boolean) =>
 							v ? <Tag color="success">是</Tag> : <Tag>否</Tag>,
 					},
-					{ title: '类型', dataIndex: 'membershipType' },
+					{
+						title: '类型',
+						dataIndex: 'membershipType',
+						render: (v: string) => {
+							const map: Record<string, string> = {
+								free: '免费用户',
+								premium: '高级会员',
+								basic: '基础会员',
+								vip: 'VIP会员',
+								svip: 'SVIP会员',
+								trial: '试用会员',
+							};
+							const label = map[v] ?? v;
+							return v === 'free' ? (
+								<Tag>{label}</Tag>
+							) : (
+								<Tag color={themeStore.primaryColor}>{label}</Tag>
+							);
+						},
+					},
 					{
 						title: '注册时间',
 						dataIndex: 'createTime',
@@ -125,4 +147,4 @@ export function AiUsersPage() {
 			/>
 		</div>
 	);
-}
+});

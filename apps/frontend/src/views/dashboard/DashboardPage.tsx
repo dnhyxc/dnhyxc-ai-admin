@@ -12,8 +12,8 @@ import { observer } from 'mobx-react';
 import { useEffect, useState } from 'react';
 import { Navigate } from 'react-router';
 import {
-	Bar,
-	BarChart,
+	Area,
+	AreaChart,
 	CartesianGrid,
 	Cell,
 	Legend,
@@ -46,10 +46,10 @@ const chartTooltipProps = {
 		background: 'var(--color-card)',
 		border: '1px solid var(--color-border)',
 		borderRadius: '8px',
-		color: '#fff',
+		color: 'var(--color-foreground)',
 	},
-	labelStyle: { color: '#fff' },
-	itemStyle: { color: '#fff' },
+	labelStyle: { color: 'var(--color-foreground)' },
+	itemStyle: { color: 'var(--color-foreground)' },
 };
 
 const emptyStats: DashboardStats = {
@@ -117,7 +117,7 @@ const statCards: {
 ];
 
 export const DashboardPage = observer(function DashboardPage() {
-	const { authStore } = useStore();
+	const { authStore, themeStore } = useStore();
 	const [stats, setStats] = useState<DashboardStats>(emptyStats);
 	const [loading, setLoading] = useState(true);
 
@@ -149,7 +149,7 @@ export const DashboardPage = observer(function DashboardPage() {
 	return (
 		<div className="space-y-6">
 			{!stats.aiDb.connected && (
-				<div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-200">
+				<div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
 					AI 业务库未连接（{stats.aiDb.message || '未启用'}
 					），下方业务指标可能为空。管理员 / 角色 / 菜单仍可正常统计。
 				</div>
@@ -218,31 +218,71 @@ export const DashboardPage = observer(function DashboardPage() {
 						<div className="h-72">
 							{stats.usersGrowth.length ? (
 								<ResponsiveContainer width="100%" height="100%">
-									<LineChart data={stats.usersGrowth}>
+									<AreaChart data={stats.usersGrowth}>
+										<defs>
+											<linearGradient
+												id="themeGrad"
+												x1="0"
+												y1="0"
+												x2="0"
+												y2="1"
+											>
+												<stop
+													offset="0%"
+													stopColor={themeStore.primaryColor}
+													stopOpacity={0.45}
+												/>
+												<stop
+													offset="60%"
+													stopColor={themeStore.primaryColor}
+													stopOpacity={0.15}
+												/>
+												<stop
+													offset="100%"
+													stopColor={themeStore.primaryColor}
+													stopOpacity={0.01}
+												/>
+											</linearGradient>
+										</defs>
 										<CartesianGrid
 											strokeDasharray="3 3"
 											stroke="var(--color-border)"
+											vertical={false}
 										/>
 										<XAxis
 											dataKey="date"
-											tick={{ fontSize: 12 }}
-											stroke="var(--color-muted-foreground)"
+											tick={{
+												fontSize: 12,
+												fill: 'var(--color-muted-foreground)',
+											}}
+											axisLine={false}
+											tickLine={false}
 										/>
 										<YAxis
-											tick={{ fontSize: 12 }}
-											stroke="var(--color-muted-foreground)"
+											tick={{
+												fontSize: 12,
+												fill: 'var(--color-muted-foreground)',
+											}}
+											axisLine={false}
+											tickLine={false}
+											width={40}
 										/>
-										<Tooltip {...chartTooltipProps} />
-										<Line
+										<Tooltip
+											{...chartTooltipProps}
+											formatter={(value: unknown) => [
+												`${value} 人`,
+												'新增用户',
+											]}
+										/>
+										<Area
 											type="monotone"
 											dataKey="count"
 											name="新增用户"
-											stroke="#6366f1"
-											strokeWidth={2.5}
-											dot={{ r: 4, fill: '#6366f1' }}
-											activeDot={{ r: 6 }}
+											fill="url(#themeGrad)"
+											stroke={themeStore.primaryColor}
+											strokeWidth={2}
 										/>
-									</LineChart>
+									</AreaChart>
 								</ResponsiveContainer>
 							) : (
 								<div className="flex h-full items-center justify-center text-sm text-muted-foreground">
@@ -309,7 +349,37 @@ export const DashboardPage = observer(function DashboardPage() {
 						<div className="h-72">
 							{stats.moduleUsage.length ? (
 								<ResponsiveContainer width="100%" height="100%">
-									<BarChart data={stats.moduleUsage}>
+									<LineChart data={stats.moduleUsage}>
+										<defs>
+											<linearGradient
+												id="moduleGradient"
+												x1="0"
+												y1="0"
+												x2="0"
+												y2="1"
+											>
+												<stop
+													offset="0%"
+													stopColor="#6366f1"
+													stopOpacity={0.4}
+												/>
+												<stop
+													offset="100%"
+													stopColor="#6366f1"
+													stopOpacity={0}
+												/>
+											</linearGradient>
+											<linearGradient
+												id="moduleLineGradient"
+												x1="0"
+												y1="0"
+												x2="1"
+												y2="0"
+											>
+												<stop offset="0%" stopColor="#8b5cf6" />
+												<stop offset="100%" stopColor="#6366f1" />
+											</linearGradient>
+										</defs>
 										<CartesianGrid
 											strokeDasharray="3 3"
 											stroke="var(--color-border)"
@@ -323,16 +393,28 @@ export const DashboardPage = observer(function DashboardPage() {
 											tick={{ fontSize: 12 }}
 											stroke="var(--color-muted-foreground)"
 										/>
-										<Tooltip {...chartTooltipProps} />
-										<Bar dataKey="count" name="使用次数" radius={[6, 6, 0, 0]}>
-											{stats.moduleUsage.map((_, index) => (
-												<Cell
-													key={`bar-${index}`}
-													fill={COLORS[index % COLORS.length]}
-												/>
-											))}
-										</Bar>
-									</BarChart>
+										<Tooltip cursor={false} {...chartTooltipProps} />
+										<Area
+											type="monotone"
+											dataKey="count"
+											fill="url(#moduleGradient)"
+											stroke="none"
+										/>
+										<Line
+											type="monotone"
+											dataKey="count"
+											name="使用次数"
+											stroke="url(#moduleLineGradient)"
+											strokeWidth={3}
+											dot={{ r: 4, fill: '#6366f1', strokeWidth: 0 }}
+											activeDot={{
+												r: 6,
+												fill: '#8b5cf6',
+												strokeWidth: 2,
+												stroke: '#fff',
+											}}
+										/>
+									</LineChart>
 								</ResponsiveContainer>
 							) : (
 								<div className="flex h-full items-center justify-center text-sm text-muted-foreground">
