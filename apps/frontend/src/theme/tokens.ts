@@ -56,6 +56,9 @@ export function buildThemeConfig(
 			},
 			Table: {
 				headerBg: isDark ? '#334155' : '#f8fafc',
+				borderRadius: 0,
+				borderRadiusOuter: 0,
+				borderRadiusLG: 0,
 			},
 		},
 	};

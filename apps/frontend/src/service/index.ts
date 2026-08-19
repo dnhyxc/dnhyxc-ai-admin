@@ -93,3 +93,15 @@ export const deleteAiLogsApi = (ids: number[]) =>
 
 export const getAiEbooksApi = (querys?: Record<string, any>) =>
 	http.get(API.aiEbooks, { querys, silent: true });
+
+export const getAiKnowledgeApi = (querys?: Record<string, any>) =>
+	http.get(API.aiKnowledge, { querys, silent: true });
+
+export const getAiKnowledgeTrashApi = (querys?: Record<string, any>) =>
+	http.get(API.aiKnowledgeTrash, { querys, silent: true });
+
+export const deleteAiKnowledgeApi = (id: string) =>
+	http.delete(API.deleteAiKnowledge, { params: [id] });
+
+export const deleteAiKnowledgeTrashApi = (id: string) =>
+	http.delete(API.deleteAiKnowledgeTrash, { params: [id] });

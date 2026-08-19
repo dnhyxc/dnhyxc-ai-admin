@@ -5,6 +5,7 @@ import { AI_DB_ENABLED, DatabaseModule } from './database/database.module';
 import { appConfig } from './factorys/app-config.factory';
 import { RedisConfigFactory } from './factorys/redis-config.factory';
 import { AiEbookModule } from './services/ai-ebook/ai-ebook.module';
+import { AiKnowledgeModule } from './services/ai-knowledge/ai-knowledge.module';
 import { AiLogsModule } from './services/ai-logs/ai-logs.module';
 import { AiUserModule } from './services/ai-user/ai-user.module';
 import { AuthModule } from './services/auth/auth.module';
@@ -35,7 +36,9 @@ import { UserModule } from './services/user/user.module';
 		SeedModule,
 		HealthModule,
 		DashboardModule,
-		...(AI_DB_ENABLED ? [AiUserModule, AiLogsModule, AiEbookModule] : []),
+		...(AI_DB_ENABLED
+			? [AiUserModule, AiLogsModule, AiEbookModule, AiKnowledgeModule]
+			: []),
 	],
 	providers: [Logger],
 	exports: [Logger],

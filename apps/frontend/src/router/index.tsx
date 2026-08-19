@@ -3,6 +3,7 @@ import { AdminLayout } from '@/components/layout/AdminLayout';
 import { resolveHomePath } from '@/router/menu';
 import { store } from '@/store';
 import { AiEbooksPage } from '@/views/ai-ebooks/AiEbooksPage';
+import { AiKnowledgePage } from '@/views/ai-knowledge/AiKnowledgePage';
 import { AiLogsPage } from '@/views/ai-logs/AiLogsPage';
 import { AiUsersPage } from '@/views/ai-users/AiUsersPage';
 import { BindAiUserPage } from '@/views/bind-ai-user/BindAiUserPage';
@@ -76,6 +77,7 @@ export const router = createBrowserRouter([
 			{ path: 'menus', element: <MenusPage /> },
 			{ path: 'ai-users', element: <AiUsersPage /> },
 			{ path: 'ai-ebooks', element: <AiEbooksPage /> },
+			{ path: 'ai-knowledge', element: <AiKnowledgePage /> },
 			{ path: 'ai-logs', element: <AiLogsPage /> },
 			{ path: 'logs', element: <LogsPage /> },
 		],

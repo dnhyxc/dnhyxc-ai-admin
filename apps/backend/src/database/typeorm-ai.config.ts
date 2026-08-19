@@ -3,6 +3,8 @@ import { ConfigService } from '@nestjs/config';
 import { TypeOrmModuleOptions, TypeOrmOptionsFactory } from '@nestjs/typeorm';
 import { AiDbEnum } from '../enum/config.enum';
 import { AiEbookBook } from '../services/ai-ebook/ai-ebook-book.entity';
+import { AiKnowledge } from '../services/ai-knowledge/ai-knowledge.entity';
+import { AiKnowledgeTrash } from '../services/ai-knowledge/ai-knowledge-trash.entity';
 import { AiLog } from '../services/ai-logs/ai-log.entity';
 import { AiRole } from '../services/ai-user/ai-role.entity';
 import { AiUser } from '../services/ai-user/ai-user.entity';
@@ -48,7 +50,14 @@ export class TypeOrmAiConfigService implements TypeOrmOptionsFactory {
 				this.configService.get<string>(AiDbEnum.AI_DB_DATABASE) ||
 				'dnhyxc_ai_db',
 			timezone: 'Z',
-			entities: [AiUser, AiRole, AiLog, AiEbookBook],
+			entities: [
+				AiUser,
+				AiRole,
+				AiLog,
+				AiEbookBook,
+				AiKnowledge,
+				AiKnowledgeTrash,
+			],
 			// 企业级硬约束：业务库禁止自动同步
 			synchronize: false,
 			logging: false,

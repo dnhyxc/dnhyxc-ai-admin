@@ -24,23 +24,30 @@ const DEFAULT_MENUS = [
 		icon: 'BookOpen',
 	},
 	{
+		name: '知识库列表',
+		path: '/ai-knowledge',
+		order: 7,
+		acl: 'ai-knowledge',
+		icon: 'Database',
+	},
+	{
 		name: 'AI 日志',
 		path: '/ai-logs',
-		order: 7,
+		order: 8,
 		acl: 'ai-logs',
 		icon: 'FileText',
 	},
 	{
 		name: '后台日志',
 		path: '/logs',
-		order: 8,
+		order: 9,
 		acl: 'logs',
 		icon: 'ScrollText',
 	},
 ];
 
 /** 普通用户默认可见菜单 path */
-const USER_MENU_PATHS = ['/ai-ebooks'];
+const USER_MENU_PATHS = ['/ai-ebooks', '/ai-knowledge'];
 
 @Injectable()
 export class SeedService implements OnModuleInit {
@@ -133,7 +140,7 @@ export class SeedService implements OnModuleInit {
 			userRole = await this.rolesRepo.save(
 				this.rolesRepo.create({
 					name: '普通用户',
-					description: '仅可查看关联前台账号的书籍列表',
+					description: '仅可查看关联前台账号的书籍与知识库',
 					menus: userMenus,
 				}),
 			);
@@ -147,7 +154,7 @@ export class SeedService implements OnModuleInit {
 			want.size === have.size && [...want].every((id) => have.has(id));
 		if (!same) {
 			userRole.menus = userMenus;
-			userRole.description = '仅可查看关联前台账号的书籍列表';
+			userRole.description = '仅可查看关联前台账号的书籍与知识库';
 			await this.rolesRepo.save(userRole);
 			this.logger.log('已同步普通用户角色菜单');
 		}

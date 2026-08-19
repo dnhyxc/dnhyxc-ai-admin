@@ -83,6 +83,48 @@
 	--color-sidebar-border: #1e293b;
 }
 
+/* 取消所有 antd Table 顶部圆角，保留底部圆角（全局强制覆盖，适配所有列表页面） */
+:where(.ant-table-wrapper),
+:where(.ant-table),
+:where(.ant-table-container),
+:where(.ant-table-content),
+:where(.ant-table-header),
+:where(.ant-table-body),
+:where(.ant-table-ping-left),
+:where(.ant-table-ping-right) {
+	border-top-left-radius: 0 !important;
+	border-top-right-radius: 0 !important;
+	border-start-start-radius: 0 !important;
+	border-start-end-radius: 0 !important;
+}
+
+:where(.ant-table-thead > tr > th),
+:where(.ant-table-thead > tr > td),
+:where(.ant-table-thead > tr:first-child > th),
+:where(.ant-table-thead > tr:first-child > td),
+:where(.ant-table-thead > tr:first-child > th:first-child),
+:where(.ant-table-thead > tr:first-child > th:last-child),
+:where(.ant-table-thead > tr:first-child > td:first-child),
+:where(.ant-table-thead > tr:first-child > td:last-child),
+:where(.ant-table-tbody > tr:first-child > td:first-child),
+:where(.ant-table-tbody > tr:first-child > td:last-child) {
+	border-top-left-radius: 0 !important;
+	border-top-right-radius: 0 !important;
+	border-start-start-radius: 0 !important;
+	border-start-end-radius: 0 !important;
+}
+
+/* 固定列场景：左右固定列首行首/尾单元格 */
+:where(.ant-table-cell-fix-left),
+:where(.ant-table-cell-fix-right),
+:where(.ant-table-cell-fix-left-last),
+:where(.ant-table-cell-fix-right-first) {
+	border-top-left-radius: 0 !important;
+	border-top-right-radius: 0 !important;
+	border-start-start-radius: 0 !important;
+	border-start-end-radius: 0 !important;
+}
+
 .login-grid {
 	background-image:
 		linear-gradient(rgba(99, 102, 241, 0.08) 1px, transparent 1px),
