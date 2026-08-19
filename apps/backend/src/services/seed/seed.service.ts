@@ -31,23 +31,30 @@ const DEFAULT_MENUS = [
 		icon: 'Database',
 	},
 	{
+		name: '学习笔记',
+		path: '/ai-learning-note',
+		order: 8,
+		acl: 'ai-learning-note',
+		icon: 'NotebookPen',
+	},
+	{
 		name: 'AI 日志',
 		path: '/ai-logs',
-		order: 8,
+		order: 9,
 		acl: 'ai-logs',
 		icon: 'FileText',
 	},
 	{
 		name: '后台日志',
 		path: '/logs',
-		order: 9,
+		order: 10,
 		acl: 'logs',
 		icon: 'ScrollText',
 	},
 ];
 
 /** 普通用户默认可见菜单 path */
-const USER_MENU_PATHS = ['/ai-ebooks', '/ai-knowledge'];
+const USER_MENU_PATHS = ['/ai-ebooks', '/ai-knowledge', '/ai-learning-note'];
 
 @Injectable()
 export class SeedService implements OnModuleInit {
@@ -140,7 +147,7 @@ export class SeedService implements OnModuleInit {
 			userRole = await this.rolesRepo.save(
 				this.rolesRepo.create({
 					name: '普通用户',
-					description: '仅可查看关联前台账号的书籍与知识库',
+					description: '仅可查看关联前台账号的书籍、知识库与学习笔记',
 					menus: userMenus,
 				}),
 			);

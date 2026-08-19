@@ -8,6 +8,7 @@ import { AiEbookModule } from './services/ai-ebook/ai-ebook.module';
 import { AiKnowledgeModule } from './services/ai-knowledge/ai-knowledge.module';
 import { AiLogsModule } from './services/ai-logs/ai-logs.module';
 import { AiUserModule } from './services/ai-user/ai-user.module';
+import { AiLearningNoteModule } from './services/ai-learning-note/ai-learning-note.module';
 import { AuthModule } from './services/auth/auth.module';
 import { DashboardModule } from './services/dashboard/dashboard.module';
 import { HealthModule } from './services/health/health.module';
@@ -37,7 +38,13 @@ import { UserModule } from './services/user/user.module';
 		HealthModule,
 		DashboardModule,
 		...(AI_DB_ENABLED
-			? [AiUserModule, AiLogsModule, AiEbookModule, AiKnowledgeModule]
+			? [
+					AiUserModule,
+					AiLogsModule,
+					AiEbookModule,
+					AiKnowledgeModule,
+					AiLearningNoteModule,
+				]
 			: []),
 	],
 	providers: [Logger],

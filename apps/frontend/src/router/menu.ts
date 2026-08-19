@@ -7,6 +7,7 @@ import {
 	LayoutDashboard,
 	MenuSquare,
 	MonitorSmartphone,
+	NotebookPen,
 	ScrollText,
 	Server,
 	Shield,
@@ -37,7 +38,8 @@ export const menuItems: MenuEntry[] = [
 		children: [
 			{ path: '/ai-users', label: '用户管理', icon: Bot },
 			{ path: '/ai-ebooks', label: '书籍管理', icon: BookOpen },
-			{ path: '/ai-knowledge', label: '知识库管理', icon: Database },
+			{ path: '/ai-knowledge', label: '知识管理', icon: Database },
+			{ path: '/ai-learning-note', label: '学习笔记', icon: NotebookPen },
 			{ path: '/ai-logs', label: '日志管理', icon: ScrollText },
 		],
 	},

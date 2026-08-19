@@ -8,6 +8,7 @@ import { AiLogsPage } from '@/views/ai-logs/AiLogsPage';
 import { AiUsersPage } from '@/views/ai-users/AiUsersPage';
 import { BindAiUserPage } from '@/views/bind-ai-user/BindAiUserPage';
 import { DashboardPage } from '@/views/dashboard/DashboardPage';
+import { AiLearningNotePage } from '@/views/ai-learning-note/AiLearningNotePage';
 import { LoginPage } from '@/views/login/LoginPage';
 import { LogsPage } from '@/views/logs/LogsPage';
 import { MenusPage } from '@/views/menus/MenusPage';
@@ -79,6 +80,7 @@ export const router = createBrowserRouter([
 			{ path: 'ai-ebooks', element: <AiEbooksPage /> },
 			{ path: 'ai-knowledge', element: <AiKnowledgePage /> },
 			{ path: 'ai-logs', element: <AiLogsPage /> },
+			{ path: 'ai-learning-note', element: <AiLearningNotePage /> },
 			{ path: 'logs', element: <LogsPage /> },
 		],
 	},

@@ -105,3 +105,9 @@ export const deleteAiKnowledgeApi = (id: string) =>
 
 export const deleteAiKnowledgeTrashApi = (id: string) =>
 	http.delete(API.deleteAiKnowledgeTrash, { params: [id] });
+
+export const getAiLearningNotesApi = (querys?: Record<string, any>) =>
+	http.get(API.aiLearningNotes, { querys, silent: true });
+
+export const deleteAiLearningNoteApi = (id: string) =>
+	http.delete(API.deleteAiLearningNote, { params: [id] });

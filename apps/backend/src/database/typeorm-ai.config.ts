@@ -8,6 +8,7 @@ import { AiKnowledgeTrash } from '../services/ai-knowledge/ai-knowledge-trash.en
 import { AiLog } from '../services/ai-logs/ai-log.entity';
 import { AiRole } from '../services/ai-user/ai-role.entity';
 import { AiUser } from '../services/ai-user/ai-user.entity';
+import { AiLearningNote } from '../services/ai-learning-note/ai-learning-note.entity';
 import { parseBoolean } from '../utils';
 
 /**
@@ -57,6 +58,7 @@ export class TypeOrmAiConfigService implements TypeOrmOptionsFactory {
 				AiEbookBook,
 				AiKnowledge,
 				AiKnowledgeTrash,
+				AiLearningNote,
 			],
 			// 企业级硬约束：业务库禁止自动同步
 			synchronize: false,

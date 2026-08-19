@@ -142,7 +142,7 @@ export const AiKnowledgePage = observer(function AiKnowledgePage() {
 				{
 					title: '操作',
 					key: 'action',
-					width: 120,
+					width: 100,
 					fixed: 'right' as const,
 					render: (_: unknown, r: AnyRow) => (
 						<Popconfirm
@@ -153,7 +153,7 @@ export const AiKnowledgePage = observer(function AiKnowledgePage() {
 								load(activeTab, pageNo, pageSize);
 							}}
 						>
-							<Button danger type="link" size="small">
+							<Button danger type="link" size="small" className="px-0!">
 								彻底删除
 							</Button>
 						</Popconfirm>
@@ -198,7 +198,7 @@ export const AiKnowledgePage = observer(function AiKnowledgePage() {
 				{
 					title: '操作',
 					key: 'action',
-					width: 100,
+					width: 90,
 					fixed: 'right' as const,
 					render: (_: unknown, r: AnyRow) => (
 						<Popconfirm
@@ -209,7 +209,7 @@ export const AiKnowledgePage = observer(function AiKnowledgePage() {
 								load(activeTab, pageNo, pageSize);
 							}}
 						>
-							<Button danger type="link" size="small">
+							<Button danger type="link" size="small" className="px-0!">
 								删除
 							</Button>
 						</Popconfirm>
