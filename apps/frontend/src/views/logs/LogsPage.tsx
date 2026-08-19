@@ -43,78 +43,75 @@ export function LogsPage() {
 	}, []);
 
 	return (
-		<div>
-			<div
-				style={{
-					display: 'flex',
-					justifyContent: 'space-between',
-					alignItems: 'center',
-					gap: 16,
-					marginBottom: 16,
-				}}
-			>
-				<Typography.Text type="secondary">共 {total} 条</Typography.Text>
-				<Space>
-					<Popconfirm
-						title={`确认删除选中的 ${selectedRowKeys.length} 条？`}
-						disabled={!selectedRowKeys.length}
-						onConfirm={async () => {
-							await deleteLogsApi(selectedRowKeys.map(Number));
-							message.success('已删除');
-							load();
-						}}
-					>
-						<Button danger disabled={!selectedRowKeys.length}>
-							批量删除
-						</Button>
-					</Popconfirm>
-				</Space>
+		<div className="h-full flex flex-col">
+			<div className="shrink-0 px-6 pt-6 pb-4">
+				<div className="flex items-center justify-between gap-4">
+					<Typography.Text type="secondary">共 {total} 条</Typography.Text>
+					<Space wrap>
+						<Popconfirm
+							title={`确认删除选中的 ${selectedRowKeys.length} 条？`}
+							disabled={!selectedRowKeys.length}
+							onConfirm={async () => {
+								await deleteLogsApi(selectedRowKeys.map(Number));
+								message.success('已删除');
+								load();
+							}}
+						>
+							<Button danger disabled={!selectedRowKeys.length}>
+								批量删除
+							</Button>
+						</Popconfirm>
+					</Space>
+				</div>
 			</div>
-			<Table
-				rowKey="id"
-				dataSource={list}
-				pagination={tablePagination(total, pageNo, pageSize, load)}
-				rowSelection={{
-					selectedRowKeys,
-					onChange: setSelectedRowKeys,
-				}}
-				columns={[
-					{ title: 'ID', dataIndex: 'id', width: 80 },
-					{
-						title: '用户',
-						render: (_, r) => r.user?.username || '—',
-					},
-					{ title: '动作', dataIndex: 'action' },
-					{ title: '方法', dataIndex: 'method', width: 90 },
-					{ title: '路径', dataIndex: 'path' },
-					{ title: '结果', dataIndex: 'result', width: 80 },
-					{
-						title: '请求时间',
-						dataIndex: 'createTime',
-						width: 180,
-						render: (v: string) => formatRequestTime(v),
-					},
-					{
-						title: '操作',
-						width: 90,
-						fixed: 'right',
-						render: (_, r) => (
-							<Popconfirm
-								title="确认删除？"
-								onConfirm={async () => {
-									await deleteLogApi(r.id);
-									message.success('已删除');
-									load();
-								}}
-							>
-								<Button danger type="link" size="small">
-									删除
-								</Button>
-							</Popconfirm>
-						),
-					},
-				]}
-			/>
+			<div className="flex-1 min-h-0 overflow-auto px-6 pb-6">
+				<Table
+					rowKey="id"
+					dataSource={list}
+					pagination={tablePagination(total, pageNo, pageSize, load)}
+					scroll={{ x: 1100 }}
+					rowSelection={{
+						selectedRowKeys,
+						onChange: setSelectedRowKeys,
+					}}
+					columns={[
+						{ title: 'ID', dataIndex: 'id', width: 80 },
+						{
+							title: '用户',
+							render: (_, r) => r.user?.username || '—',
+						},
+						{ title: '动作', dataIndex: 'action' },
+						{ title: '方法', dataIndex: 'method', width: 90 },
+						{ title: '路径', dataIndex: 'path' },
+						{ title: '结果', dataIndex: 'result', width: 80 },
+						{
+							title: '请求时间',
+							dataIndex: 'createTime',
+							width: 180,
+							render: (v: string) => formatRequestTime(v),
+						},
+						{
+							title: '操作',
+							width: 90,
+							fixed: 'right',
+							render: (_, r) => (
+								<Popconfirm
+									title="确认删除？"
+									onConfirm={async () => {
+										await deleteLogApi(r.id);
+										message.success('已删除');
+										load();
+									}}
+								>
+									<Button danger type="link" size="small">
+										删除
+									</Button>
+								</Popconfirm>
+							),
+						},
+					]}
+				/>
+			</div>
 		</div>
 	);
 }

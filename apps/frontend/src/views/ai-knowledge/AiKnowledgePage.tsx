@@ -218,67 +218,66 @@ export const AiKnowledgePage = observer(function AiKnowledgePage() {
 			];
 
 	return (
-		<div className="flex h-full min-h-0 flex-col gap-4">
-			<div className="shrink-0">
-				<Tabs
-					activeKey={activeTab}
-					onChange={(k) => load(k as TabKey, 1, pageSize)}
-					items={[
-						{ key: 'list', label: '知识库列表' },
-						{ key: 'trash', label: '回收站列表' },
-					]}
-					className="[&_.ant-tabs-tab]:pt-0!"
-				/>
-			</div>
-
-			<div className="shrink-0 flex items-center justify-between gap-4">
-				<Typography.Text type="secondary">
-					{isAdmin
-						? `读取 dnhyxc-ai 业务库 ${tableName} · 共 ${total} 条`
-						: authStore.userInfo?.aiUserId
-							? `仅显示关联前台账号的知识库 · 共 ${total} 条`
-							: '尚未绑定前台账号'}
-				</Typography.Text>
-				<Space wrap>
-					<Input
-						placeholder="标题"
-						value={title}
-						onChange={(e) => setTitle(e.target.value)}
-						style={{ width: 180 }}
-						allowClear
+		<div className="h-full flex flex-col">
+			<div className="shrink-0 px-6 pt-6 pb-4">
+				<div className="pb-4">
+					<Tabs
+						activeKey={activeTab}
+						onChange={(k) => load(k as TabKey, 1, pageSize)}
+						items={[
+							{ key: 'list', label: '知识库列表' },
+							{ key: 'trash', label: '回收站列表' },
+						]}
+						className="[&_.ant-tabs-tab]:pt-0!"
 					/>
-					{isAdmin && (
+				</div>
+				<div className="flex items-center justify-between gap-4 pb-4">
+					<Typography.Text type="secondary">
+						{isAdmin
+							? `读取 dnhyxc-ai 业务库 ${tableName} · 共 ${total} 条`
+							: authStore.userInfo?.aiUserId
+								? `仅显示关联前台账号的知识库 · 共 ${total} 条`
+								: '尚未绑定前台账号'}
+					</Typography.Text>
+					<Space wrap>
 						<Input
-							placeholder="作者"
-							value={author}
-							onChange={(e) => setAuthor(e.target.value)}
-							style={{ width: 160 }}
+							placeholder="标题"
+							value={title}
+							onChange={(e) => setTitle(e.target.value)}
+							style={{ width: 180 }}
 							allowClear
 						/>
-					)}
-					<Button type="primary" onClick={() => load(activeTab, 1, pageSize)}>
-						查询
-					</Button>
-				</Space>
+						{isAdmin && (
+							<Input
+								placeholder="作者"
+								value={author}
+								onChange={(e) => setAuthor(e.target.value)}
+								style={{ width: 160 }}
+								allowClear
+							/>
+						)}
+						<Button type="primary" onClick={() => load(activeTab, 1, pageSize)}>
+							查询
+						</Button>
+					</Space>
+				</div>
+				{error && (
+					<div className="pb-4">
+						<Alert type="warning" showIcon message={error} />
+					</div>
+				)}
 			</div>
 
-			{error && (
-				<div className="shrink-0">
-					<Alert type="warning" showIcon message={error} />
-				</div>
-			)}
-
-			<div className="flex min-h-0 flex-1 flex-col">
+			<div className="flex-1 min-h-0 overflow-auto px-6 pb-6">
 				<Table
 					rowKey="id"
 					dataSource={list}
 					pagination={tablePagination(total, pageNo, pageSize, (p, s) =>
 						load(activeTab, p, s),
 					)}
-					scroll={{ x: 1400, y: '100%' }}
+					scroll={{ x: 1400 }}
 					locale={{ emptyText: error ? ' ' : '暂无数据' }}
 					columns={columns}
-					className="h-full"
 				/>
 			</div>
 		</div>

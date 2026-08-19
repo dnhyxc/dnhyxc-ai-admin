@@ -83,57 +83,62 @@ export const RolesPage = observer(function RolesPage() {
 	];
 
 	return (
-		<div>
+		<div className="h-full flex flex-col">
 			{canWrite && (
-				<Card size="small" title="新建角色" style={{ marginBottom: 16 }}>
-					<Form
-						form={form}
-						layout="inline"
-						onFinish={async (values) => {
-							await createRoleApi(values);
-							message.success('已创建角色');
-							form.resetFields();
-							load();
-						}}
-					>
-						<Form.Item name="name" rules={[{ required: true }]}>
-							<Input placeholder="角色名" />
-						</Form.Item>
-						<Form.Item name="description">
-							<Input placeholder="描述" />
-						</Form.Item>
-						<Form.Item name="menuIds">
-							<Select
-								mode="multiple"
-								allowClear
-								placeholder="关联菜单"
-								style={{ minWidth: 220 }}
-								options={menus.map((m) => ({ value: m.id, label: m.name }))}
-							/>
-						</Form.Item>
-						<Form.Item>
-							<Button type="primary" htmlType="submit">
-								创建角色
-							</Button>
-						</Form.Item>
-					</Form>
-				</Card>
+				<div className="shrink-0 px-6 pt-6 pb-4">
+					<Card size="small" title="新建角色">
+						<Form
+							form={form}
+							layout="inline"
+							onFinish={async (values) => {
+								await createRoleApi(values);
+								message.success('已创建角色');
+								form.resetFields();
+								load();
+							}}
+						>
+							<Form.Item name="name" rules={[{ required: true }]}>
+								<Input placeholder="角色名" />
+							</Form.Item>
+							<Form.Item name="description">
+								<Input placeholder="描述" />
+							</Form.Item>
+							<Form.Item name="menuIds">
+								<Select
+									mode="multiple"
+									allowClear
+									placeholder="关联菜单"
+									style={{ minWidth: 220 }}
+									options={menus.map((m) => ({ value: m.id, label: m.name }))}
+								/>
+							</Form.Item>
+							<Form.Item>
+								<Button type="primary" htmlType="submit">
+									创建角色
+								</Button>
+							</Form.Item>
+						</Form>
+					</Card>
+				</div>
 			)}
 
-			<Table
-				rowKey="id"
-				dataSource={list}
-				columns={columns as any}
-				pagination={tablePagination(
-					list.length,
-					pageNo,
-					pageSize,
-					(page, size) => {
-						setPageNo(page);
-						setPageSize(size);
-					},
-				)}
-			/>
+			<div className="flex-1 min-h-0 overflow-auto px-6 pb-6">
+				<Table
+					rowKey="id"
+					dataSource={list}
+					columns={columns as any}
+					pagination={tablePagination(
+						list.length,
+						pageNo,
+						pageSize,
+						(page, size) => {
+							setPageNo(page);
+							setPageSize(size);
+						},
+					)}
+					scroll={{ x: 800 }}
+				/>
+			</div>
 		</div>
 	);
 });

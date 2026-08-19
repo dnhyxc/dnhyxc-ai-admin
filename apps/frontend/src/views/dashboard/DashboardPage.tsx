@@ -147,7 +147,7 @@ export const DashboardPage = observer(function DashboardPage() {
 	}
 
 	return (
-		<div className="space-y-6">
+		<div className="p-6 space-y-6">
 			{!stats.aiDb.connected && (
 				<div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
 					AI 业务库未连接（{stats.aiDb.message || '未启用'}

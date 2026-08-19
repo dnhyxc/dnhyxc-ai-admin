@@ -94,7 +94,7 @@ export const ProfilePage = observer(function ProfilePage() {
 	};
 
 	return (
-		<div className="mx-auto flex w-full max-w-xl flex-col gap-6">
+		<div className="p-6 mx-auto flex w-full max-w-xl flex-col gap-6">
 			<Card>
 				<CardHeader>
 					<CardTitle>账号信息</CardTitle>

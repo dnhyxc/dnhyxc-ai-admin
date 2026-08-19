@@ -138,27 +138,32 @@ export const UsersPage = observer(function UsersPage() {
 	];
 
 	return (
-		<div>
-			<Space style={{ marginBottom: 12 }}>
-				<Input
-					placeholder="搜索用户名"
-					value={username}
-					onChange={(e) => setUsername(e.target.value)}
-					style={{ width: 200 }}
-					allowClear
-					onPressEnter={() => load(1, pageSize)}
-				/>
-				<Button type="primary" onClick={() => load(1, pageSize)}>
-					查询
-				</Button>
-			</Space>
+		<div className="h-full flex flex-col">
+			<div className="shrink-0 px-6 pt-6 pb-4">
+				<Space wrap>
+					<Input
+						placeholder="搜索用户名"
+						value={username}
+						onChange={(e) => setUsername(e.target.value)}
+						style={{ width: 200 }}
+						allowClear
+						onPressEnter={() => load(1, pageSize)}
+					/>
+					<Button type="primary" onClick={() => load(1, pageSize)}>
+						查询
+					</Button>
+				</Space>
+			</div>
 
-			<Table
-				rowKey="id"
-				dataSource={list}
-				columns={columns}
-				pagination={tablePagination(total, pageNo, pageSize, load)}
-			/>
+			<div className="flex-1 min-h-0 overflow-auto px-6 pb-6">
+				<Table
+					rowKey="id"
+					dataSource={list}
+					columns={columns}
+					pagination={tablePagination(total, pageNo, pageSize, load)}
+					scroll={{ x: 1000 }}
+				/>
+			</div>
 		</div>
 	);
 });

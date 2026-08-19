@@ -53,98 +53,91 @@ export const AiUsersPage = observer(function AiUsersPage() {
 	}, []);
 
 	return (
-		<div>
-			<div
-				style={{
-					display: 'flex',
-					justifyContent: 'space-between',
-					alignItems: 'center',
-					gap: 16,
-					marginBottom: 16,
-				}}
-			>
-				<Typography.Text type="secondary">
-					读取 dnhyxc-ai 业务库 · 共 {total} 人
-				</Typography.Text>
-				<Space>
-					<Input
-						placeholder="搜索用户名"
-						value={username}
-						onChange={(e) => setUsername(e.target.value)}
-						style={{ width: 200 }}
-						allowClear
-						onPressEnter={() => load(1, pageSize)}
-					/>
-					<Button type="primary" onClick={() => load(1, pageSize)}>
-						查询
-					</Button>
-				</Space>
+		<div className="h-full flex flex-col">
+			<div className="shrink-0 px-6 pt-6 pb-4">
+				<div className="flex items-center justify-between gap-4 pb-4">
+					<Typography.Text type="secondary">
+						读取 dnhyxc-ai 业务库 · 共 {total} 人
+					</Typography.Text>
+					<Space wrap>
+						<Input
+							placeholder="搜索用户名"
+							value={username}
+							onChange={(e) => setUsername(e.target.value)}
+							style={{ width: 200 }}
+							allowClear
+							onPressEnter={() => load(1, pageSize)}
+						/>
+						<Button type="primary" onClick={() => load(1, pageSize)}>
+							查询
+						</Button>
+					</Space>
+				</div>
+				{error && (
+					<div className="pb-4">
+						<Alert type="warning" showIcon message={error} />
+					</div>
+				)}
 			</div>
 
-			{error && (
-				<Alert
-					type="warning"
-					showIcon
-					message={error}
-					style={{ marginBottom: 16 }}
-				/>
-			)}
-
-			<Table
-				rowKey="id"
-				dataSource={list}
-				locale={{ emptyText: error ? ' ' : '暂无数据' }}
-				pagination={tablePagination(total, pageNo, pageSize, load)}
-				columns={[
-					{ title: 'ID', dataIndex: 'id', width: 80 },
-					{ title: '用户名', dataIndex: 'username' },
-					{ title: '邮箱', dataIndex: 'email' },
-					{
-						title: '角色',
-						dataIndex: 'roles',
-						render: (roles: AiUser['roles']) =>
-							roles?.length
-								? roles.map((r) => (
-										<Tag key={r.id} color={r.id === 1 ? 'gold' : 'default'}>
-											{r.name}
-										</Tag>
-									))
-								: '—',
-					},
-					{
-						title: '会员',
-						dataIndex: 'isMember',
-						render: (v: boolean) =>
-							v ? <Tag color="success">是</Tag> : <Tag>否</Tag>,
-					},
-					{
-						title: '类型',
-						dataIndex: 'membershipType',
-						render: (v: string) => {
-							const map: Record<string, string> = {
-								free: '免费用户',
-								premium: '高级会员',
-								basic: '基础会员',
-								vip: 'VIP会员',
-								svip: 'SVIP会员',
-								trial: '试用会员',
-							};
-							const label = map[v] ?? v;
-							return v === 'free' ? (
-								<Tag>{label}</Tag>
-							) : (
-								<Tag color={themeStore.primaryColor}>{label}</Tag>
-							);
+			<div className="flex-1 min-h-0 overflow-auto px-6 pb-6">
+				<Table
+					rowKey="id"
+					dataSource={list}
+					locale={{ emptyText: error ? ' ' : '暂无数据' }}
+					pagination={tablePagination(total, pageNo, pageSize, load)}
+					scroll={{ x: 1100 }}
+					columns={[
+						{ title: 'ID', dataIndex: 'id', width: 80 },
+						{ title: '用户名', dataIndex: 'username' },
+						{ title: '邮箱', dataIndex: 'email' },
+						{
+							title: '角色',
+							dataIndex: 'roles',
+							render: (roles: AiUser['roles']) =>
+								roles?.length
+									? roles.map((r) => (
+											<Tag key={r.id} color={r.id === 1 ? 'gold' : 'default'}>
+												{r.name}
+											</Tag>
+										))
+									: '—',
 						},
-					},
-					{
-						title: '注册时间',
-						dataIndex: 'createTime',
-						render: (v: string | null) =>
-							v ? new Date(v).toLocaleString('zh-CN') : '—',
-					},
-				]}
-			/>
+						{
+							title: '会员',
+							dataIndex: 'isMember',
+							render: (v: boolean) =>
+								v ? <Tag color="success">是</Tag> : <Tag>否</Tag>,
+						},
+						{
+							title: '类型',
+							dataIndex: 'membershipType',
+							render: (v: string) => {
+								const map: Record<string, string> = {
+									free: '免费用户',
+									premium: '高级会员',
+									basic: '基础会员',
+									vip: 'VIP会员',
+									svip: 'SVIP会员',
+									trial: '试用会员',
+								};
+								const label = map[v] ?? v;
+								return v === 'free' ? (
+									<Tag>{label}</Tag>
+								) : (
+									<Tag color={themeStore.primaryColor}>{label}</Tag>
+								);
+							},
+						},
+						{
+							title: '注册时间',
+							dataIndex: 'createTime',
+							render: (v: string | null) =>
+								v ? new Date(v).toLocaleString('zh-CN') : '—',
+						},
+					]}
+				/>
+			</div>
 		</div>
 	);
 });

@@ -72,58 +72,63 @@ export const MenusPage = observer(function MenusPage() {
 	];
 
 	return (
-		<div>
+		<div className="h-full flex flex-col">
 			{canWrite && (
-				<Card size="small" title="新建菜单" style={{ marginBottom: 16 }}>
-					<Form
-						form={form}
-						layout="inline"
-						initialValues={{ order: 0 }}
-						onFinish={async (values) => {
-							await createMenuApi(values);
-							message.success('已创建菜单');
-							form.resetFields();
-							load();
-						}}
-					>
-						<Form.Item name="name" rules={[{ required: true }]}>
-							<Input placeholder="名称" />
-						</Form.Item>
-						<Form.Item name="path" rules={[{ required: true }]}>
-							<Input placeholder="路径" />
-						</Form.Item>
-						<Form.Item name="order">
-							<InputNumber placeholder="排序" />
-						</Form.Item>
-						<Form.Item name="acl">
-							<Input placeholder="ACL" />
-						</Form.Item>
-						<Form.Item name="icon">
-							<Input placeholder="图标" />
-						</Form.Item>
-						<Form.Item>
-							<Button type="primary" htmlType="submit">
-								创建菜单
-							</Button>
-						</Form.Item>
-					</Form>
-				</Card>
+				<div className="shrink-0 px-6 pt-6 pb-4">
+					<Card size="small" title="新建菜单">
+						<Form
+							form={form}
+							layout="inline"
+							initialValues={{ order: 0 }}
+							onFinish={async (values) => {
+								await createMenuApi(values);
+								message.success('已创建菜单');
+								form.resetFields();
+								load();
+							}}
+						>
+							<Form.Item name="name" rules={[{ required: true }]}>
+								<Input placeholder="名称" />
+							</Form.Item>
+							<Form.Item name="path" rules={[{ required: true }]}>
+								<Input placeholder="路径" />
+							</Form.Item>
+							<Form.Item name="order">
+								<InputNumber placeholder="排序" />
+							</Form.Item>
+							<Form.Item name="acl">
+								<Input placeholder="ACL" />
+							</Form.Item>
+							<Form.Item name="icon">
+								<Input placeholder="图标" />
+							</Form.Item>
+							<Form.Item>
+								<Button type="primary" htmlType="submit">
+									创建菜单
+								</Button>
+							</Form.Item>
+						</Form>
+					</Card>
+				</div>
 			)}
 
-			<Table
-				rowKey="id"
-				dataSource={list}
-				columns={columns as any}
-				pagination={tablePagination(
-					list.length,
-					pageNo,
-					pageSize,
-					(page, size) => {
-						setPageNo(page);
-						setPageSize(size);
-					},
-				)}
-			/>
+			<div className="flex-1 min-h-0 overflow-auto px-6 pb-6">
+				<Table
+					rowKey="id"
+					dataSource={list}
+					columns={columns as any}
+					pagination={tablePagination(
+						list.length,
+						pageNo,
+						pageSize,
+						(page, size) => {
+							setPageNo(page);
+							setPageSize(size);
+						},
+					)}
+					scroll={{ x: 900 }}
+				/>
+			</div>
 		</div>
 	);
 });

@@ -111,133 +111,125 @@ export function AiLogsPage() {
 	}, []);
 
 	return (
-		<div>
-			<div
-				style={{
-					display: 'flex',
-					justifyContent: 'space-between',
-					alignItems: 'center',
-					gap: 16,
-					marginBottom: 16,
-				}}
-			>
-				<Typography.Text type="secondary">
-					读取 dnhyxc-ai 业务库 logs · 共 {total} 条
-				</Typography.Text>
-				<Space wrap>
-					<Input
-						placeholder="路径"
-						value={path}
-						onChange={(e) => setPath(e.target.value)}
-						style={{ width: 180 }}
-						allowClear
-					/>
-					<Input
-						placeholder="用户名"
-						value={username}
-						onChange={(e) => setUsername(e.target.value)}
-						style={{ width: 160 }}
-						allowClear
-					/>
-					<Button type="primary" onClick={() => load(1, pageSize)}>
-						查询
-					</Button>
-					<Popconfirm
-						title={`确认删除选中的 ${selectedRowKeys.length} 条？`}
-						disabled={!selectedRowKeys.length}
-						onConfirm={async () => {
-							await deleteAiLogsApi(selectedRowKeys.map(Number));
-							message.success('已删除');
-							load();
-						}}
-					>
-						<Button danger disabled={!selectedRowKeys.length}>
-							批量删除
+		<div className="h-full flex flex-col">
+			<div className="shrink-0 px-6 pt-6 pb-4">
+				<div className="flex items-center justify-between gap-4 pb-4">
+					<Typography.Text type="secondary">
+						读取 dnhyxc-ai 业务库 logs · 共 {total} 条
+					</Typography.Text>
+					<Space wrap>
+						<Input
+							placeholder="路径"
+							value={path}
+							onChange={(e) => setPath(e.target.value)}
+							style={{ width: 180 }}
+							allowClear
+						/>
+						<Input
+							placeholder="用户名"
+							value={username}
+							onChange={(e) => setUsername(e.target.value)}
+							style={{ width: 160 }}
+							allowClear
+						/>
+						<Button type="primary" onClick={() => load(1, pageSize)}>
+							查询
 						</Button>
-					</Popconfirm>
-				</Space>
+						<Popconfirm
+							title={`确认删除选中的 ${selectedRowKeys.length} 条？`}
+							disabled={!selectedRowKeys.length}
+							onConfirm={async () => {
+								await deleteAiLogsApi(selectedRowKeys.map(Number));
+								message.success('已删除');
+								load();
+							}}
+						>
+							<Button danger disabled={!selectedRowKeys.length}>
+								批量删除
+							</Button>
+						</Popconfirm>
+					</Space>
+				</div>
+				{error && (
+					<div className="pb-4">
+						<Alert type="warning" showIcon message={error} />
+					</div>
+				)}
 			</div>
 
-			{error && (
-				<Alert
-					type="warning"
-					showIcon
-					message={error}
-					style={{ marginBottom: 16 }}
+			<div className="flex-1 min-h-0 overflow-auto px-6 pb-6">
+				<Table
+					rowKey="id"
+					dataSource={list}
+					pagination={tablePagination(total, pageNo, pageSize, load)}
+					scroll={{ x: 1280 }}
+					locale={{ emptyText: error ? ' ' : '暂无数据' }}
+					rowSelection={{
+						selectedRowKeys,
+						onChange: setSelectedRowKeys,
+					}}
+					columns={[
+						{ title: 'ID', dataIndex: 'id', width: 80 },
+						{
+							title: '用户',
+							width: 120,
+							render: (_, r) => r.user?.username || '—',
+						},
+						{
+							title: '方法',
+							dataIndex: 'method',
+							width: 90,
+							render: (v: string) => <Tag>{v}</Tag>,
+						},
+						{ title: '路径', dataIndex: 'path', ellipsis: true },
+						{
+							title: '结果',
+							dataIndex: 'result',
+							width: 80,
+							render: (v: number) => (
+								<Tag color={v >= 200 && v < 400 ? 'success' : 'error'}>{v}</Tag>
+							),
+						},
+						{
+							title: '请求数据',
+							dataIndex: 'data',
+							ellipsis: { showTitle: false },
+							render: (v: string) => renderDataCell(v),
+						},
+						{
+							title: '响应数据',
+							dataIndex: 'responseData',
+							ellipsis: { showTitle: false },
+							render: (v: string) => renderDataCell(v),
+						},
+						{
+							title: '请求时间',
+							dataIndex: 'createTime',
+							width: 180,
+							render: (v: string) => formatRequestTime(v),
+						},
+						{
+							title: '操作',
+							width: 90,
+							fixed: 'right',
+							render: (_, r) => (
+								<Popconfirm
+									title="确认删除？"
+									onConfirm={async () => {
+										await deleteAiLogApi(r.id);
+										message.success('已删除');
+										load();
+									}}
+								>
+									<Button danger type="link" size="small">
+										删除
+									</Button>
+								</Popconfirm>
+							),
+						},
+					]}
 				/>
-			)}
-
-			<Table
-				rowKey="id"
-				dataSource={list}
-				pagination={tablePagination(total, pageNo, pageSize, load)}
-				scroll={{ x: 1280 }}
-				locale={{ emptyText: error ? ' ' : '暂无数据' }}
-				rowSelection={{
-					selectedRowKeys,
-					onChange: setSelectedRowKeys,
-				}}
-				columns={[
-					{ title: 'ID', dataIndex: 'id', width: 80 },
-					{
-						title: '用户',
-						width: 120,
-						render: (_, r) => r.user?.username || '—',
-					},
-					{
-						title: '方法',
-						dataIndex: 'method',
-						width: 90,
-						render: (v: string) => <Tag>{v}</Tag>,
-					},
-					{ title: '路径', dataIndex: 'path', ellipsis: true },
-					{
-						title: '结果',
-						dataIndex: 'result',
-						width: 80,
-						render: (v: number) => (
-							<Tag color={v >= 200 && v < 400 ? 'success' : 'error'}>{v}</Tag>
-						),
-					},
-					{
-						title: '请求数据',
-						dataIndex: 'data',
-						ellipsis: { showTitle: false },
-						render: (v: string) => renderDataCell(v),
-					},
-					{
-						title: '响应数据',
-						dataIndex: 'responseData',
-						ellipsis: { showTitle: false },
-						render: (v: string) => renderDataCell(v),
-					},
-					{
-						title: '请求时间',
-						dataIndex: 'createTime',
-						width: 180,
-						render: (v: string) => formatRequestTime(v),
-					},
-					{
-						title: '操作',
-						width: 90,
-						fixed: 'right',
-						render: (_, r) => (
-							<Popconfirm
-								title="确认删除？"
-								onConfirm={async () => {
-									await deleteAiLogApi(r.id);
-									message.success('已删除');
-									load();
-								}}
-							>
-								<Button danger type="link" size="small">
-									删除
-								</Button>
-							</Popconfirm>
-						),
-					},
-				]}
-			/>
+			</div>
 		</div>
 	);
 }
