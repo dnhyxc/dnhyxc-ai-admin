@@ -24,7 +24,7 @@ type MenuRow = {
 };
 
 export const MenusPage = observer(function MenusPage() {
-	const { authStore } = useStore();
+	const { authStore, noticeStore } = useStore();
 	const canWrite = authStore.isSuperAdmin;
 	const [list, setList] = useState<MenuRow[]>([]);
 	const [pageNo, setPageNo] = useState(1);
@@ -32,9 +32,14 @@ export const MenusPage = observer(function MenusPage() {
 	const [form] = Form.useForm();
 
 	const load = async () => {
-		const res = await getMenusApi();
-		setList(res.data as MenuRow[]);
-		setPageNo(1);
+		noticeStore.setPageLoading(true);
+		try {
+			const res = await getMenusApi();
+			setList(res.data as MenuRow[]);
+			setPageNo(1);
+		} finally {
+			noticeStore.setPageLoading(false);
+		}
 	};
 
 	useEffect(() => {
@@ -116,6 +121,7 @@ export const MenusPage = observer(function MenusPage() {
 				<Table
 					rowKey="id"
 					dataSource={list}
+					locale={{ emptyText: '暂无数据' }}
 					columns={columns as any}
 					pagination={tablePagination(
 						list.length,

@@ -1,4 +1,4 @@
-import { Alert, Button, Input, Space, Table, Tag, Typography } from 'antd';
+import { Button, Input, Space, Table, Tag, Typography } from 'antd';
 import { observer } from 'mobx-react';
 import { useEffect, useState } from 'react';
 import { DEFAULT_PAGE_SIZE, tablePagination } from '@/lib/table-pagination';
@@ -17,17 +17,17 @@ type AiUser = {
 };
 
 export const AiUsersPage = observer(function AiUsersPage() {
-	const { themeStore } = useStore();
+	const { themeStore, noticeStore } = useStore();
 	const [list, setList] = useState<AiUser[]>([]);
 	const [total, setTotal] = useState(0);
 	const [pageNo, setPageNo] = useState(1);
 	const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
 	const [username, setUsername] = useState('');
-	const [error, setError] = useState('');
 
 	const load = async (page = pageNo, size = pageSize) => {
+		noticeStore.setPageLoading(true);
 		try {
-			setError('');
+			noticeStore.hide();
 			const res = await getAiUsersApi({
 				pageNo: page,
 				pageSize: size,
@@ -41,10 +41,12 @@ export const AiUsersPage = observer(function AiUsersPage() {
 		} catch (e: any) {
 			setList([]);
 			setTotal(0);
-			setError(
+			noticeStore.show(
 				e?.message ||
 					'AI 业务库不可用，请确认 AI_DB_ENABLED=true 且 dnhyxc-ai MySQL 已启动',
 			);
+		} finally {
+			noticeStore.setPageLoading(false);
 		}
 	};
 
@@ -64,7 +66,7 @@ export const AiUsersPage = observer(function AiUsersPage() {
 							placeholder="搜索用户名"
 							value={username}
 							onChange={(e) => setUsername(e.target.value)}
-							style={{ width: 200 }}
+							style={{ width: 300 }}
 							allowClear
 							onPressEnter={() => load(1, pageSize)}
 						/>
@@ -73,18 +75,13 @@ export const AiUsersPage = observer(function AiUsersPage() {
 						</Button>
 					</Space>
 				</div>
-				{error && (
-					<div className="pb-4">
-						<Alert type="warning" showIcon message={error} />
-					</div>
-				)}
 			</div>
 
 			<div className="flex-1 min-h-0 overflow-auto px-6 pb-6">
 				<Table
 					rowKey="id"
 					dataSource={list}
-					locale={{ emptyText: error ? ' ' : '暂无数据' }}
+					locale={{ emptyText: noticeStore.visible ? ' ' : '暂无数据' }}
 					pagination={tablePagination(total, pageNo, pageSize, load)}
 					scroll={{ x: 1100 }}
 					columns={[

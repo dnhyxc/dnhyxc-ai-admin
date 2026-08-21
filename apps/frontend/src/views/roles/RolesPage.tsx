@@ -3,9 +3,11 @@ import {
 	Card,
 	Form,
 	Input,
+	Modal,
 	message,
 	Popconfirm,
 	Select,
+	Space,
 	Table,
 } from 'antd';
 import { observer } from 'mobx-react';
@@ -16,6 +18,7 @@ import {
 	deleteRoleApi,
 	getMenusApi,
 	getRolesApi,
+	updateRoleApi,
 } from '@/service';
 import { useStore } from '@/store';
 
@@ -27,18 +30,26 @@ type RoleRow = {
 };
 
 export const RolesPage = observer(function RolesPage() {
-	const { authStore } = useStore();
+	const { authStore, noticeStore } = useStore();
 	const canWrite = authStore.isSuperAdmin;
 	const [list, setList] = useState<RoleRow[]>([]);
 	const [menus, setMenus] = useState<Array<{ id: number; name: string }>>([]);
 	const [pageNo, setPageNo] = useState(1);
 	const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
 	const [form] = Form.useForm();
+	const [editForm] = Form.useForm();
+	const [editing, setEditing] = useState<RoleRow | null>(null);
+	const [saving, setSaving] = useState(false);
 
 	const load = async () => {
-		const res = await getRolesApi();
-		setList(res.data as RoleRow[]);
-		setPageNo(1);
+		noticeStore.setPageLoading(true);
+		try {
+			const res = await getRolesApi();
+			setList(res.data as RoleRow[]);
+			setPageNo(1);
+		} finally {
+			noticeStore.setPageLoading(false);
+		}
 	};
 
 	useEffect(() => {
@@ -48,10 +59,34 @@ export const RolesPage = observer(function RolesPage() {
 		}
 	}, [canWrite]);
 
+	const openEdit = (r: RoleRow) => {
+		setEditing(r);
+		editForm.setFieldsValue({
+			name: r.name,
+			description: r.description,
+			menuIds: r.menus?.map((m) => m.id) || [],
+		});
+	};
+
+	const submitEdit = async () => {
+		if (!editing) return;
+		const values = await editForm.validateFields();
+		setSaving(true);
+		try {
+			await updateRoleApi(editing.id, values);
+			message.success('角色菜单已更新');
+			setEditing(null);
+			editForm.resetFields();
+			load();
+		} finally {
+			setSaving(false);
+		}
+	};
+
 	const columns = [
 		{ title: 'ID', dataIndex: 'id', width: 80 },
-		{ title: '名称', dataIndex: 'name' },
-		{ title: '描述', dataIndex: 'description' },
+		{ title: '名称', dataIndex: 'name', width: 180 },
+		{ title: '描述', dataIndex: 'description', width: 300 },
 		{
 			title: '菜单',
 			render: (_: unknown, r: RoleRow) =>
@@ -61,21 +96,31 @@ export const RolesPage = observer(function RolesPage() {
 			? [
 					{
 						title: '操作',
-						width: 100,
+						width: 140,
 						render: (_: unknown, r: RoleRow) => (
-							<Popconfirm
-								title="确认删除？"
-								disabled={r.id === 1}
-								onConfirm={async () => {
-									await deleteRoleApi(r.id);
-									message.success('已删除');
-									load();
-								}}
-							>
-								<Button danger type="link" size="small" disabled={r.id === 1}>
-									删除
+							<Space size={0} className="flex items-center gap-2">
+								<Button
+									type="link"
+									size="small"
+									className="px-0!"
+									onClick={() => openEdit(r)}
+								>
+									分配菜单
 								</Button>
-							</Popconfirm>
+								<Popconfirm
+									title="确认删除？"
+									disabled={r.id === 1}
+									onConfirm={async () => {
+										await deleteRoleApi(r.id);
+										message.success('已删除');
+										load();
+									}}
+								>
+									<Button danger type="link" size="small" disabled={r.id === 1}>
+										删除
+									</Button>
+								</Popconfirm>
+							</Space>
 						),
 					},
 				]
@@ -126,6 +171,7 @@ export const RolesPage = observer(function RolesPage() {
 				<Table
 					rowKey="id"
 					dataSource={list}
+					locale={{ emptyText: '暂无数据' }}
 					columns={columns as any}
 					pagination={tablePagination(
 						list.length,
@@ -139,6 +185,44 @@ export const RolesPage = observer(function RolesPage() {
 					scroll={{ x: 800 }}
 				/>
 			</div>
+
+			<Modal
+				title={`分配菜单 - ${editing?.name || ''}`}
+				open={editing !== null}
+				onOk={submitEdit}
+				confirmLoading={saving}
+				okText="保存"
+				cancelText="取消"
+				destroyOnHidden
+				onCancel={() => {
+					setEditing(null);
+					editForm.resetFields();
+				}}
+			>
+				<Form form={editForm} layout="vertical">
+					<Form.Item
+						name="name"
+						label="角色名"
+						rules={[{ required: true, message: '请输入角色名' }]}
+					>
+						<Input placeholder="角色名" />
+					</Form.Item>
+					<Form.Item name="description" label="描述">
+						<Input placeholder="描述" />
+					</Form.Item>
+					<Form.Item name="menuIds" label="关联菜单">
+						<Select
+							mode="multiple"
+							allowClear
+							placeholder="选择该角色可访问的菜单"
+							options={menus.map((m) => ({
+								value: m.id,
+								label: m.name,
+							}))}
+						/>
+					</Form.Item>
+				</Form>
+			</Modal>
 		</div>
 	);
 });

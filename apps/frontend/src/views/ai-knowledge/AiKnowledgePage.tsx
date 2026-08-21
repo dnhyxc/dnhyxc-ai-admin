@@ -1,5 +1,4 @@
 import {
-	Alert,
 	Button,
 	Input,
 	message,
@@ -55,7 +54,7 @@ function formatTime(v?: string) {
 }
 
 export const AiKnowledgePage = observer(function AiKnowledgePage() {
-	const { authStore } = useStore();
+	const { authStore, noticeStore } = useStore();
 	const isAdmin = authStore.isSuperAdmin;
 	const [activeTab, setActiveTab] = useState<TabKey>('list');
 	const [list, setList] = useState<AnyRow[]>([]);
@@ -64,15 +63,15 @@ export const AiKnowledgePage = observer(function AiKnowledgePage() {
 	const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
 	const [title, setTitle] = useState('');
 	const [author, setAuthor] = useState('');
-	const [error, setError] = useState('');
 
 	const load = async (
 		tab: TabKey = activeTab,
 		page = pageNo,
 		size = pageSize,
 	) => {
+		noticeStore.setPageLoading(true);
 		try {
-			setError('');
+			noticeStore.hide();
 			const api = tab === 'trash' ? getAiKnowledgeTrashApi : getAiKnowledgeApi;
 			const res = await api({
 				pageNo: page,
@@ -89,10 +88,12 @@ export const AiKnowledgePage = observer(function AiKnowledgePage() {
 		} catch (e: any) {
 			setList([]);
 			setTotal(0);
-			setError(
+			noticeStore.show(
 				e?.message ||
 					'AI 业务库不可用，请确认 AI_DB_ENABLED=true 且 dnhyxc-ai MySQL 已启动',
 			);
+		} finally {
+			noticeStore.setPageLoading(false);
 		}
 	};
 
@@ -244,7 +245,7 @@ export const AiKnowledgePage = observer(function AiKnowledgePage() {
 							placeholder="标题"
 							value={title}
 							onChange={(e) => setTitle(e.target.value)}
-							style={{ width: 180 }}
+							style={{ width: 300 }}
 							allowClear
 						/>
 						{isAdmin && (
@@ -252,7 +253,7 @@ export const AiKnowledgePage = observer(function AiKnowledgePage() {
 								placeholder="作者"
 								value={author}
 								onChange={(e) => setAuthor(e.target.value)}
-								style={{ width: 160 }}
+								style={{ width: 300 }}
 								allowClear
 							/>
 						)}
@@ -261,11 +262,6 @@ export const AiKnowledgePage = observer(function AiKnowledgePage() {
 						</Button>
 					</Space>
 				</div>
-				{error && (
-					<div className="pb-4">
-						<Alert type="warning" showIcon message={error} />
-					</div>
-				)}
 			</div>
 
 			<div className="flex-1 min-h-0 overflow-auto px-6 pb-6">
@@ -275,8 +271,7 @@ export const AiKnowledgePage = observer(function AiKnowledgePage() {
 					pagination={tablePagination(total, pageNo, pageSize, (p, s) =>
 						load(activeTab, p, s),
 					)}
-					scroll={{ x: 1400 }}
-					locale={{ emptyText: error ? ' ' : '暂无数据' }}
+					locale={{ emptyText: noticeStore.visible ? ' ' : '暂无数据' }}
 					columns={columns}
 				/>
 			</div>

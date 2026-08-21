@@ -6,6 +6,8 @@ export const API = {
 	sendChangePasswordCode: '/auth/sendChangePasswordCode',
 	profile: '/auth/profile',
 	bindAiUser: '/ai-user/bind',
+	currentAiBind: '/ai-user/current-bind',
+	rebindAiUser: '/ai-user/rebind',
 	overview: '/dashboard/overview',
 	users: '/user/getUsers',
 	addUser: '/user/addUser',

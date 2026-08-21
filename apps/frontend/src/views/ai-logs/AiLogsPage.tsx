@@ -1,5 +1,4 @@
 import {
-	Alert,
 	Button,
 	Input,
 	message,
@@ -13,6 +12,7 @@ import {
 import { type Key, useEffect, useState } from 'react';
 import { DEFAULT_PAGE_SIZE, tablePagination } from '@/lib/table-pagination';
 import { deleteAiLogApi, deleteAiLogsApi, getAiLogsApi } from '@/service';
+import { useStore } from '@/store';
 
 type AiLogRow = {
 	id: number;
@@ -71,18 +71,19 @@ function renderDataCell(v?: string | null) {
 }
 
 export function AiLogsPage() {
+	const { noticeStore } = useStore();
 	const [list, setList] = useState<AiLogRow[]>([]);
 	const [total, setTotal] = useState(0);
 	const [pageNo, setPageNo] = useState(1);
 	const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
 	const [path, setPath] = useState('');
 	const [username, setUsername] = useState('');
-	const [error, setError] = useState('');
 	const [selectedRowKeys, setSelectedRowKeys] = useState<Key[]>([]);
 
 	const load = async (page = pageNo, size = pageSize) => {
+		noticeStore.setPageLoading(true);
 		try {
-			setError('');
+			noticeStore.hide();
 			const res = await getAiLogsApi({
 				pageNo: page,
 				pageSize: size,
@@ -99,10 +100,12 @@ export function AiLogsPage() {
 			setList([]);
 			setTotal(0);
 			setSelectedRowKeys([]);
-			setError(
+			noticeStore.show(
 				e?.message ||
 					'AI 业务库不可用，请确认 AI_DB_ENABLED=true 且 dnhyxc-ai MySQL 已启动',
 			);
+		} finally {
+			noticeStore.setPageLoading(false);
 		}
 	};
 
@@ -122,14 +125,14 @@ export function AiLogsPage() {
 							placeholder="路径"
 							value={path}
 							onChange={(e) => setPath(e.target.value)}
-							style={{ width: 180 }}
+							style={{ width: 300 }}
 							allowClear
 						/>
 						<Input
 							placeholder="用户名"
 							value={username}
 							onChange={(e) => setUsername(e.target.value)}
-							style={{ width: 160 }}
+							style={{ width: 300 }}
 							allowClear
 						/>
 						<Button type="primary" onClick={() => load(1, pageSize)}>
@@ -150,11 +153,6 @@ export function AiLogsPage() {
 						</Popconfirm>
 					</Space>
 				</div>
-				{error && (
-					<div className="pb-4">
-						<Alert type="warning" showIcon message={error} />
-					</div>
-				)}
 			</div>
 
 			<div className="flex-1 min-h-0 overflow-auto px-6 pb-6">
@@ -162,8 +160,7 @@ export function AiLogsPage() {
 					rowKey="id"
 					dataSource={list}
 					pagination={tablePagination(total, pageNo, pageSize, load)}
-					scroll={{ x: 1280 }}
-					locale={{ emptyText: error ? ' ' : '暂无数据' }}
+					locale={{ emptyText: noticeStore.visible ? ' ' : '暂无数据' }}
 					rowSelection={{
 						selectedRowKeys,
 						onChange: setSelectedRowKeys,

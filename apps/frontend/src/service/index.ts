@@ -32,6 +32,14 @@ export const sendChangePasswordCodeApi = (data: { email: string }) =>
 export const bindAiUserApi = (data: { username: string; email: string }) =>
 	http.post(API.bindAiUser, { data });
 
+export const getCurrentAiBindApi = () => http.get(API.currentAiBind);
+
+export const rebindAiUserApi = (data: {
+	username: string;
+	email: string;
+	password: string;
+}) => http.post(API.rebindAiUser, { data });
+
 export const profileApi = () => http.get(API.profile);
 
 export const overviewApi = () => http.get(API.overview);

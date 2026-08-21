@@ -117,21 +117,20 @@ const statCards: {
 ];
 
 export const DashboardPage = observer(function DashboardPage() {
-	const { authStore, themeStore } = useStore();
+	const { authStore, themeStore, noticeStore } = useStore();
 	const [stats, setStats] = useState<DashboardStats>(emptyStats);
-	const [loading, setLoading] = useState(true);
 
 	useEffect(() => {
 		if (!authStore.isSuperAdmin) {
-			setLoading(false);
 			return;
 		}
+		noticeStore.setPageLoading(true);
 		overviewApi()
 			.then((res) =>
 				setStats({ ...emptyStats, ...(res.data as DashboardStats) }),
 			)
 			.catch(() => {})
-			.finally(() => setLoading(false));
+			.finally(() => noticeStore.setPageLoading(false));
 	}, [authStore.isSuperAdmin]);
 
 	if (!authStore.isSuperAdmin) {
@@ -171,7 +170,9 @@ export const DashboardPage = observer(function DashboardPage() {
 											{card.title}
 										</p>
 										<p className="mt-2 text-2xl font-bold">
-											{loading ? '—' : displayValue}
+											{!stats.aiDb.connected && !authStore.isSuperAdmin
+												? '—'
+												: displayValue}
 										</p>
 									</div>
 									<div
@@ -201,7 +202,7 @@ export const DashboardPage = observer(function DashboardPage() {
 						<CardContent className="p-4">
 							<p className="text-sm text-muted-foreground">{item.title}</p>
 							<p className="mt-1 text-xl font-semibold">
-								{loading ? '—' : formatNumber(item.value)}
+								{formatNumber(item.value)}
 							</p>
 						</CardContent>
 					</Card>

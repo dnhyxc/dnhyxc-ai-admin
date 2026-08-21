@@ -1,4 +1,4 @@
-import { Alert, Button, Input, Space, Table, Tag, Typography } from 'antd';
+import { Button, Input, Space, Table, Tag, Typography } from 'antd';
 import { observer } from 'mobx-react';
 import { useEffect, useState } from 'react';
 import { DEFAULT_PAGE_SIZE, tablePagination } from '@/lib/table-pagination';
@@ -40,7 +40,7 @@ function formatTime(v?: string) {
 }
 
 export const AiEbooksPage = observer(function AiEbooksPage() {
-	const { authStore } = useStore();
+	const { authStore, noticeStore } = useStore();
 	const isAdmin = authStore.isSuperAdmin;
 	const [list, setList] = useState<AiEbookRow[]>([]);
 	const [total, setTotal] = useState(0);
@@ -48,11 +48,11 @@ export const AiEbooksPage = observer(function AiEbooksPage() {
 	const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
 	const [title, setTitle] = useState('');
 	const [username, setUsername] = useState('');
-	const [error, setError] = useState('');
 
 	const load = async (page = pageNo, size = pageSize) => {
+		noticeStore.setPageLoading(true);
 		try {
-			setError('');
+			noticeStore.hide();
 			const res = await getAiEbooksApi({
 				pageNo: page,
 				pageSize: size,
@@ -67,10 +67,12 @@ export const AiEbooksPage = observer(function AiEbooksPage() {
 		} catch (e: any) {
 			setList([]);
 			setTotal(0);
-			setError(
+			noticeStore.show(
 				e?.message ||
 					'AI 业务库不可用，请确认 AI_DB_ENABLED=true 且 dnhyxc-ai MySQL 已启动',
 			);
+		} finally {
+			noticeStore.setPageLoading(false);
 		}
 	};
 
@@ -94,7 +96,7 @@ export const AiEbooksPage = observer(function AiEbooksPage() {
 							placeholder="书名"
 							value={title}
 							onChange={(e) => setTitle(e.target.value)}
-							style={{ width: 180 }}
+							style={{ width: 300 }}
 							allowClear
 						/>
 						{isAdmin && (
@@ -102,7 +104,7 @@ export const AiEbooksPage = observer(function AiEbooksPage() {
 								placeholder="用户名"
 								value={username}
 								onChange={(e) => setUsername(e.target.value)}
-								style={{ width: 160 }}
+								style={{ width: 300 }}
 								allowClear
 							/>
 						)}
@@ -111,11 +113,6 @@ export const AiEbooksPage = observer(function AiEbooksPage() {
 						</Button>
 					</Space>
 				</div>
-				{error && (
-					<div className="pb-4">
-						<Alert type="warning" showIcon message={error} />
-					</div>
-				)}
 			</div>
 
 			<div className="flex-1 min-h-0 overflow-auto px-6 pb-6">
@@ -124,7 +121,9 @@ export const AiEbooksPage = observer(function AiEbooksPage() {
 					dataSource={list}
 					pagination={tablePagination(total, pageNo, pageSize, load)}
 					scroll={{ x: 1100 }}
-					locale={{ emptyText: error ? ' ' : '暂无数据' }}
+					locale={{
+						emptyText: noticeStore.visible ? ' ' : '暂无数据',
+					}}
 					columns={[
 						{
 							title: '书名',

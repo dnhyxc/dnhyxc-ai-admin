@@ -3,9 +3,11 @@ import {
 	Injectable,
 	NotFoundException,
 } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { In, Like, Not, Repository } from 'typeorm';
+import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
+import { DataSource, In, Like, Not, Repository } from 'typeorm';
+import { DB_CONNECTIONS } from '../../database/constants';
 import { hashPassword } from '../../utils';
+import { AiUser } from '../ai-user/ai-user.entity';
 import { Logs } from '../logs/logs.entity';
 import { Roles } from '../roles/roles.entity';
 import { CreateUserDTO } from './dto/create-user.dto';
@@ -13,6 +15,10 @@ import { GetUserDto } from './dto/get-user.dto';
 import { UpdateUserDTO } from './dto/update-user.dto';
 import { Profile } from './profile.entity';
 import { User } from './user.entity';
+
+export interface UserView extends User {
+	aiUsername?: string | null;
+}
 
 @Injectable()
 export class UserService {
@@ -24,9 +30,15 @@ export class UserService {
 		private readonly profileRepository: Repository<Profile>,
 		@InjectRepository(Logs)
 		private readonly logsRepository: Repository<Logs>,
+		@InjectRepository(AiUser, DB_CONNECTIONS.AI)
+		private readonly aiUserRepository: Repository<AiUser>,
+		@InjectDataSource(DB_CONNECTIONS.AI)
+		private readonly aiDataSource: DataSource,
 	) {}
 
-	async findAll(query: GetUserDto): Promise<{ list: User[]; total: number }> {
+	async findAll(
+		query: GetUserDto,
+	): Promise<{ list: UserView[]; total: number }> {
 		const { pageSize = 10, pageNo = 1, username, role } = query;
 		const take = pageSize;
 		const skip = (pageNo - 1) * take;
@@ -51,7 +63,30 @@ export class UserService {
 			order: { id: 'DESC' },
 		});
 
-		return { list, total };
+		// 批量查询关联的前台账号用户名
+		const aiUsernameMap = new Map<number, string>();
+		if (this.aiDataSource?.isInitialized && list.length > 0) {
+			const userIds = list
+				.map((u) => u.aiUserId)
+				.filter((id): id is number => id != null);
+			if (userIds.length > 0) {
+				const aiUsers = await this.aiUserRepository
+					.createQueryBuilder('u')
+					.where('u.id IN (:...ids)', { ids: userIds })
+					.getMany();
+				for (const au of aiUsers) {
+					aiUsernameMap.set(au.id, au.username);
+				}
+			}
+		}
+
+		const viewList: UserView[] = list.map((u) => ({
+			...u,
+			aiUsername:
+				u.aiUserId != null ? (aiUsernameMap.get(u.aiUserId) ?? null) : null,
+		}));
+
+		return { list: viewList, total };
 	}
 
 	findByUsername(username: string): Promise<User | null> {

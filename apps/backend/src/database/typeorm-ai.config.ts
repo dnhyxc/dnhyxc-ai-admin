@@ -5,10 +5,10 @@ import { AiDbEnum } from '../enum/config.enum';
 import { AiEbookBook } from '../services/ai-ebook/ai-ebook-book.entity';
 import { AiKnowledge } from '../services/ai-knowledge/ai-knowledge.entity';
 import { AiKnowledgeTrash } from '../services/ai-knowledge/ai-knowledge-trash.entity';
+import { AiLearningNote } from '../services/ai-learning-note/ai-learning-note.entity';
 import { AiLog } from '../services/ai-logs/ai-log.entity';
 import { AiRole } from '../services/ai-user/ai-role.entity';
 import { AiUser } from '../services/ai-user/ai-user.entity';
-import { AiLearningNote } from '../services/ai-learning-note/ai-learning-note.entity';
 import { parseBoolean } from '../utils';
 
 /**

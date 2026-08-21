@@ -1,9 +1,8 @@
 import {
-	Alert,
 	Button,
 	Input,
-	message,
 	Modal,
+	message,
 	Popconfirm,
 	Space,
 	Table,
@@ -13,10 +12,7 @@ import {
 import { observer } from 'mobx-react';
 import { useEffect, useState } from 'react';
 import { DEFAULT_PAGE_SIZE, tablePagination } from '@/lib/table-pagination';
-import {
-	deleteAiLearningNoteApi,
-	getAiLearningNotesApi,
-} from '@/service';
+import { deleteAiLearningNoteApi, getAiLearningNotesApi } from '@/service';
 import { useStore } from '@/store';
 
 type LearningNoteRow = {
@@ -39,19 +35,19 @@ function formatTime(v?: string | null) {
 }
 
 export const AiLearningNotePage = observer(function AiLearningNotePage() {
-	const { authStore } = useStore();
+	const { authStore, noticeStore } = useStore();
 	const isAdmin = authStore.isSuperAdmin;
 	const [list, setList] = useState<LearningNoteRow[]>([]);
 	const [total, setTotal] = useState(0);
 	const [pageNo, setPageNo] = useState(1);
 	const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
 	const [title, setTitle] = useState('');
-	const [error, setError] = useState('');
 	const [previewContent, setPreviewContent] = useState<string | null>(null);
 
 	const load = async (page = pageNo, size = pageSize) => {
+		noticeStore.setPageLoading(true);
 		try {
-			setError('');
+			noticeStore.hide();
 			const res = await getAiLearningNotesApi({
 				pageNo: page,
 				pageSize: size,
@@ -65,10 +61,12 @@ export const AiLearningNotePage = observer(function AiLearningNotePage() {
 		} catch (e: any) {
 			setList([]);
 			setTotal(0);
-			setError(
+			noticeStore.show(
 				e?.message ||
 					'AI 业务库不可用，请确认 AI_DB_ENABLED=true 且 dnhyxc-ai MySQL 已启动',
 			);
+		} finally {
+			noticeStore.setPageLoading(false);
 		}
 	};
 
@@ -121,7 +119,7 @@ export const AiLearningNotePage = observer(function AiLearningNotePage() {
 						type="link"
 						size="small"
 						disabled={!r.content}
-						className='px-0!'
+						className="px-0!"
 						onClick={() => setPreviewContent(r.content)}
 					>
 						查看
@@ -159,7 +157,7 @@ export const AiLearningNotePage = observer(function AiLearningNotePage() {
 							placeholder="标题"
 							value={title}
 							onChange={(e) => setTitle(e.target.value)}
-							style={{ width: 180 }}
+							style={{ width: 300 }}
 							allowClear
 						/>
 						<Button type="primary" onClick={() => load(1, pageSize)}>
@@ -167,11 +165,6 @@ export const AiLearningNotePage = observer(function AiLearningNotePage() {
 						</Button>
 					</Space>
 				</div>
-				{error && (
-					<div className="pb-4">
-						<Alert type="warning" showIcon message={error} />
-					</div>
-				)}
 			</div>
 
 			<div className="flex-1 min-h-0 overflow-auto px-6 pb-6">
@@ -181,8 +174,7 @@ export const AiLearningNotePage = observer(function AiLearningNotePage() {
 					pagination={tablePagination(total, pageNo, pageSize, (p, s) =>
 						load(p, s),
 					)}
-					scroll={{ x: 1000 }}
-					locale={{ emptyText: error ? ' ' : '暂无数据' }}
+					locale={{ emptyText: noticeStore.visible ? ' ' : '暂无数据' }}
 					columns={columns}
 				/>
 			</div>

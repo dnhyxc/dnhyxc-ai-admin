@@ -12,6 +12,7 @@ export type UserInfo = {
 	username: string;
 	email: string;
 	aiUserId?: number | null;
+	aiUsername?: string | null;
 	roles?: Array<{
 		id: number;
 		name: string;

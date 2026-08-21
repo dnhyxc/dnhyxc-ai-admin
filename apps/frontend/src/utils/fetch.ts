@@ -1,5 +1,6 @@
 import { message } from 'antd';
 import { BASE_URL, TOKEN_KEY, USER_INFO_KEY } from '@/constants';
+import { store } from '@/store';
 
 export interface RequestConfig {
 	params?: Array<string | number>;
@@ -27,6 +28,10 @@ function toastError(msg: string) {
 	if (now - last < TOAST_DEDUP_MS) return;
 	recentToasts.set(msg, now);
 	message.error(msg);
+}
+
+function showPermissionAlert(msg: string) {
+	store.noticeStore.show(msg);
 }
 
 function readToken() {
@@ -69,7 +74,6 @@ async function request<T>(
 
 	const json = (await res.json().catch(() => null)) as ResponseData<T> | null;
 
-	// 仅未登录 / token 失效才清会话；403 无权操作不踢回登录
 	if (res.status === 401) {
 		localStorage.removeItem(TOKEN_KEY);
 		localStorage.removeItem(USER_INFO_KEY);
@@ -78,6 +82,12 @@ async function request<T>(
 			location.href = '/login';
 		}
 		throw new Error(json?.message || 'Unauthorized');
+	}
+
+	if (res.status === 403) {
+		const msg = json?.message || '无权操作';
+		if (!config?.silent) showPermissionAlert(msg);
+		throw new Error(msg);
 	}
 
 	if (!json || json.success === false || !res.ok) {

@@ -2,6 +2,7 @@ import { Button, message, Popconfirm, Space, Table, Typography } from 'antd';
 import { type Key, useEffect, useState } from 'react';
 import { DEFAULT_PAGE_SIZE, tablePagination } from '@/lib/table-pagination';
 import { deleteLogApi, deleteLogsApi, getLogsApi } from '@/service';
+import { useStore } from '@/store';
 
 type LogRow = {
 	id: number;
@@ -22,6 +23,7 @@ function formatRequestTime(v?: string) {
 }
 
 export function LogsPage() {
+	const { noticeStore } = useStore();
 	const [list, setList] = useState<LogRow[]>([]);
 	const [total, setTotal] = useState(0);
 	const [pageNo, setPageNo] = useState(1);
@@ -29,13 +31,18 @@ export function LogsPage() {
 	const [selectedRowKeys, setSelectedRowKeys] = useState<Key[]>([]);
 
 	const load = async (page = pageNo, size = pageSize) => {
-		const res = await getLogsApi({ pageNo: page, pageSize: size });
-		const data = res.data as { list: LogRow[]; total: number };
-		setList(data.list);
-		setTotal(data.total);
-		setPageNo(page);
-		setPageSize(size);
-		setSelectedRowKeys([]);
+		noticeStore.setPageLoading(true);
+		try {
+			const res = await getLogsApi({ pageNo: page, pageSize: size });
+			const data = res.data as { list: LogRow[]; total: number };
+			setList(data.list);
+			setTotal(data.total);
+			setPageNo(page);
+			setPageSize(size);
+			setSelectedRowKeys([]);
+		} finally {
+			noticeStore.setPageLoading(false);
+		}
 	};
 
 	useEffect(() => {
@@ -68,6 +75,7 @@ export function LogsPage() {
 				<Table
 					rowKey="id"
 					dataSource={list}
+					locale={{ emptyText: '暂无数据' }}
 					pagination={tablePagination(total, pageNo, pageSize, load)}
 					scroll={{ x: 1100 }}
 					rowSelection={{

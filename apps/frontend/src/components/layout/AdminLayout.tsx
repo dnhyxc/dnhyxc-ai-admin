@@ -1,3 +1,4 @@
+import { Alert } from 'antd';
 import {
 	Check,
 	ChevronDown,
@@ -21,6 +22,7 @@ import {
 	DropdownMenuLabel,
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
+	Loading,
 	ScrollArea,
 } from '@/components/ui';
 import { cn } from '@/lib/utils';
@@ -43,7 +45,7 @@ export const AdminLayout = observer(function AdminLayout() {
 	});
 	const location = useLocation();
 	const navigate = useNavigate();
-	const { authStore, themeStore } = useStore();
+	const { authStore, noticeStore, themeStore } = useStore();
 
 	const allowedPaths = collectAllowedPaths(authStore.userInfo?.roles);
 	const allowedPathKey = [...allowedPaths].sort().join(',');
@@ -53,6 +55,11 @@ export const AdminLayout = observer(function AdminLayout() {
 	});
 	const pageTitle = resolveMenuLabel(location.pathname);
 	const activeGroup = resolveActiveGroupKey(location.pathname);
+
+	useEffect(() => {
+		// 页面切换时清除权限提示
+		noticeStore.hide();
+	}, [location.pathname]);
 
 	useEffect(() => {
 		if (activeGroup) {
@@ -330,8 +337,24 @@ export const AdminLayout = observer(function AdminLayout() {
 					</div>
 				</header>
 
-				<main className="flex-1 overflow-auto">
+				<main className="relative flex-1 overflow-auto">
+					{noticeStore.visible && (
+						<div className="p-6 pb-0">
+							<Alert
+								type="warning"
+								showIcon
+								message={noticeStore.message}
+								closable
+								onClose={() => noticeStore.hide()}
+							/>
+						</div>
+					)}
 					<Outlet />
+					{noticeStore.pageLoading && (
+						<div className="absolute inset-0 z-50 flex items-center justify-center bg-background/80">
+							<Loading size={75} text="加载中..." />
+						</div>
+					)}
 				</main>
 			</div>
 		</div>

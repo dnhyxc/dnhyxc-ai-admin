@@ -1,4 +1,5 @@
-import { Button, Form, Input, message, Space } from 'antd';
+import { SwapOutlined } from '@ant-design/icons';
+import { Button, Form, Input, Modal, message, Space } from 'antd';
 import { observer } from 'mobx-react';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
@@ -9,11 +10,16 @@ import {
 	CardHeader,
 	CardTitle,
 } from '@/components/ui';
-import { changePasswordApi, sendChangePasswordCodeApi } from '@/service';
-import { useStore } from '@/store';
+import {
+	changePasswordApi,
+	getCurrentAiBindApi,
+	rebindAiUserApi,
+	sendChangePasswordCodeApi,
+} from '@/service';
+import { type UserInfo, useStore } from '@/store';
 
 export const ProfilePage = observer(function ProfilePage() {
-	const { authStore } = useStore();
+	const { authStore, noticeStore } = useStore();
 	const navigate = useNavigate();
 	const [submitting, setSubmitting] = useState(false);
 	const [sendingCode, setSendingCode] = useState(false);
@@ -25,6 +31,19 @@ export const ProfilePage = observer(function ProfilePage() {
 		oldPassword: string;
 		newPassword: string;
 		confirmPassword: string;
+	}>();
+
+	const [currentBind, setCurrentBind] = useState<{
+		aiUserId: number | null;
+		aiUsername: string | null;
+		aiEmail: string | null;
+	} | null>(null);
+	const [rebindOpen, setRebindOpen] = useState(false);
+	const [rebinding, setRebinding] = useState(false);
+	const [rebindForm] = Form.useForm<{
+		username: string;
+		email: string;
+		password: string;
 	}>();
 
 	const user = authStore.userInfo;
@@ -39,6 +58,14 @@ export const ProfilePage = observer(function ProfilePage() {
 			form.setFieldsValue({ email: user.email });
 		}
 	}, [user?.email, form]);
+
+	useEffect(() => {
+		noticeStore.setPageLoading(true);
+		getCurrentAiBindApi()
+			.then((res) => setCurrentBind(res.data as typeof currentBind))
+			.catch(() => {})
+			.finally(() => noticeStore.setPageLoading(false));
+	}, []);
 
 	useEffect(() => {
 		if (countdown <= 0) return;
@@ -93,6 +120,33 @@ export const ProfilePage = observer(function ProfilePage() {
 		}
 	};
 
+	const handleRebind = async () => {
+		const values = await rebindForm.validateFields();
+		setRebinding(true);
+		try {
+			const res = await rebindAiUserApi(values);
+			const data = res.data as UserInfo & {
+				aiUserId: number;
+				aiUsername: string;
+			};
+			authStore.patchUserInfo({
+				aiUserId: data.aiUserId,
+				aiUsername: data.aiUsername,
+				...(data.roles ? { roles: data.roles } : {}),
+			});
+			setCurrentBind({
+				aiUserId: data.aiUserId,
+				aiUsername: data.aiUsername,
+				aiEmail: values.email,
+			});
+			message.success('前台账号换绑成功');
+			setRebindOpen(false);
+			rebindForm.resetFields();
+		} finally {
+			setRebinding(false);
+		}
+	};
+
 	return (
 		<div className="p-6 mx-auto flex w-full max-w-xl flex-col gap-6">
 			<Card>
@@ -115,6 +169,37 @@ export const ProfilePage = observer(function ProfilePage() {
 					</div>
 				</CardContent>
 			</Card>
+
+			{!authStore.isSuperAdmin && (
+				<Card>
+					<CardHeader>
+						<CardTitle>前台账号绑定</CardTitle>
+						<CardDescription>
+							当前绑定的 dnhyxc-ai 前台账号，书籍等数据按该账号隔离
+						</CardDescription>
+					</CardHeader>
+					<CardContent className="space-y-3 text-sm">
+						<div className="flex items-center justify-between border-b py-2">
+							<span className="text-muted-foreground">前台用户名</span>
+							<span className="font-medium">
+								{currentBind?.aiUsername || user?.aiUsername || '—'}
+							</span>
+						</div>
+						<div className="flex items-center justify-between border-b py-2">
+							<span className="text-muted-foreground">前台邮箱</span>
+							<span className="font-medium">{currentBind?.aiEmail || '—'}</span>
+						</div>
+						<div className="pt-2 flex justify-end">
+							<Button
+								icon={<SwapOutlined />}
+								onClick={() => setRebindOpen(true)}
+							>
+								换绑前台账号
+							</Button>
+						</div>
+					</CardContent>
+				</Card>
+			)}
 
 			<Card>
 				<CardHeader>
@@ -213,7 +298,7 @@ export const ProfilePage = observer(function ProfilePage() {
 								autoComplete="new-password"
 							/>
 						</Form.Item>
-						<Form.Item>
+						<Form.Item className="flex justify-end">
 							<Button type="primary" htmlType="submit" loading={submitting}>
 								确认修改
 							</Button>
@@ -221,6 +306,59 @@ export const ProfilePage = observer(function ProfilePage() {
 					</Form>
 				</CardContent>
 			</Card>
+
+			<Modal
+				title="换绑前台账号"
+				open={rebindOpen}
+				onOk={handleRebind}
+				confirmLoading={rebinding}
+				okText="确认换绑"
+				cancelText="取消"
+				destroyOnHidden
+				onCancel={() => {
+					setRebindOpen(false);
+					rebindForm.resetFields();
+				}}
+			>
+				<p className="mb-4 text-sm text-muted-foreground">
+					换绑后书籍等数据将按新前台账号展示，原前台账号的绑定会被解除。
+				</p>
+				<Form form={rebindForm} layout="vertical" requiredMark={false}>
+					<Form.Item
+						name="username"
+						label="新前台用户名"
+						rules={[
+							{ required: true, message: '请输入新前台用户名' },
+							{ min: 2, max: 64, message: '前台用户名长度为 2–64 位' },
+						]}
+					>
+						<Input placeholder="前台注册时的用户名" autoComplete="username" />
+					</Form.Item>
+					<Form.Item
+						name="email"
+						label="新前台邮箱"
+						rules={[
+							{ required: true, message: '请输入新前台邮箱' },
+							{ type: 'email', message: '邮箱格式不正确' },
+						]}
+					>
+						<Input placeholder="前台注册时的邮箱" autoComplete="email" />
+					</Form.Item>
+					<Form.Item
+						name="password"
+						label="当前后台密码"
+						rules={[
+							{ required: true, message: '请输入当前后台登录密码' },
+							{ min: 6, max: 32, message: '密码长度为 6–32 位' },
+						]}
+					>
+						<Input.Password
+							placeholder="用于确认身份"
+							autoComplete="current-password"
+						/>
+					</Form.Item>
+				</Form>
+			</Modal>
 		</div>
 	);
 });

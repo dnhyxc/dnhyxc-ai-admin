@@ -25,11 +25,12 @@ type UserRow = {
 	email: string;
 	isActive: boolean;
 	aiUserId?: number | null;
+	aiUsername?: string | null;
 	roles?: Array<{ id: number; name: string }>;
 };
 
 export const UsersPage = observer(function UsersPage() {
-	const { authStore } = useStore();
+	const { authStore, noticeStore } = useStore();
 	const canWrite = authStore.isSuperAdmin;
 	const [list, setList] = useState<UserRow[]>([]);
 	const [total, setTotal] = useState(0);
@@ -40,12 +41,17 @@ export const UsersPage = observer(function UsersPage() {
 	const [savingId, setSavingId] = useState<number | null>(null);
 
 	const load = async (page = pageNo, size = pageSize) => {
-		const res = await getUsersApi({ pageNo: page, pageSize: size, username });
-		const data = res.data as { list: UserRow[]; total: number };
-		setList(data.list);
-		setTotal(data.total);
-		setPageNo(page);
-		setPageSize(size);
+		noticeStore.setPageLoading(true);
+		try {
+			const res = await getUsersApi({ pageNo: page, pageSize: size, username });
+			const data = res.data as { list: UserRow[]; total: number };
+			setList(data.list);
+			setTotal(data.total);
+			setPageNo(page);
+			setPageSize(size);
+		} finally {
+			noticeStore.setPageLoading(false);
+		}
 	};
 
 	useEffect(() => {
@@ -96,10 +102,12 @@ export const UsersPage = observer(function UsersPage() {
 				),
 		},
 		{
-			title: '前台账号',
-			width: 120,
+			title: '关联用户',
+			width: 160,
 			render: (_: unknown, r: UserRow) =>
-				r.aiUserId != null ? (
+				r.aiUsername ? (
+					<Tag color="blue">{r.aiUsername}</Tag>
+				) : r.aiUserId != null ? (
 					<Tag color="blue">#{r.aiUserId}</Tag>
 				) : (
 					<Tag>未绑定</Tag>
@@ -159,6 +167,7 @@ export const UsersPage = observer(function UsersPage() {
 				<Table
 					rowKey="id"
 					dataSource={list}
+					locale={{ emptyText: '暂无数据' }}
 					columns={columns}
 					pagination={tablePagination(total, pageNo, pageSize, load)}
 					scroll={{ x: 1000 }}

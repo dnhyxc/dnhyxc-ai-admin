@@ -6,9 +6,11 @@ import {
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Like, MoreThanOrEqual, Repository } from 'typeorm';
 import { DB_CONNECTIONS } from '../../database/constants';
+import { comparePassword } from '../../utils';
 import { UserService } from '../user/user.service';
 import { AiUser } from './ai-user.entity';
 import { BindAiUserDTO } from './dto/bind-ai-user.dto';
+import { RebindAiUserDTO } from './dto/rebind-ai-user.dto';
 
 @Injectable()
 export class AiUserService {
@@ -75,6 +77,84 @@ export class AiUserService {
 		const updated = await this.userService.findOne(adminUserId);
 		if (!updated) {
 			throw new BadRequestException('绑定失败');
+		}
+		const { password: _, ...userInfo } = updated;
+		return {
+			ok: true,
+			aiUsername: aiUser.username,
+			...userInfo,
+		};
+	}
+
+	/**
+	 * 查询当前登录后台用户的前台账号绑定信息，便于个人中心展示。
+	 * AI 业务库不可用或记录缺失时仅返回 id，不中断个人中心页。
+	 */
+	async getCurrentBind(adminUserId: number) {
+		const adminUser = await this.userService.findOne(adminUserId);
+		if (!adminUser) {
+			throw new BadRequestException('用户不存在');
+		}
+		if (!adminUser.aiUserId) {
+			return { aiUserId: null, aiUsername: null, aiEmail: null };
+		}
+		let aiUser: Pick<AiUser, 'id' | 'username' | 'email'> | null = null;
+		try {
+			aiUser = await this.aiUserRepository.findOne({
+				where: { id: adminUser.aiUserId },
+				select: { id: true, username: true, email: true },
+			});
+		} catch {
+			aiUser = null;
+		}
+		return {
+			aiUserId: adminUser.aiUserId,
+			aiUsername: aiUser?.username ?? null,
+			aiEmail: aiUser?.email ?? null,
+		};
+	}
+
+	/**
+	 * 普通用户换绑前台账号：需校验当前后台账号密码，再按
+	 * 「存在性 → 邮箱一致 → 未被他人占用 → 写回 aiUserId」完成换绑。
+	 * 换绑后书籍等数据按新的 aiUserId（前台 user.id）过滤。
+	 */
+	async rebindForAdminUser(adminUserId: number, dto: RebindAiUserDTO) {
+		this.assertReady();
+		const adminUser = await this.userService.findOne(adminUserId);
+		if (!adminUser) {
+			throw new BadRequestException('用户不存在');
+		}
+
+		// 安全校验：输入当前后台账号密码，防止他人替绑
+		const isPasswordValid = await comparePassword(
+			dto.password,
+			adminUser.password,
+		);
+		if (!isPasswordValid) {
+			throw new BadRequestException('当前账号密码错误');
+		}
+
+		const aiUser = await this.findByUsername(dto.username.trim());
+		if (!aiUser) {
+			throw new BadRequestException('前台账号不存在，请检查用户名');
+		}
+		if (aiUser.email.toLowerCase() !== dto.email.trim().toLowerCase()) {
+			throw new BadRequestException('前台用户名与邮箱不匹配');
+		}
+
+		const occupied = await this.userService.findByAiUserId(
+			aiUser.id,
+			adminUserId,
+		);
+		if (occupied) {
+			throw new BadRequestException('该前台账号已被其他后台用户绑定');
+		}
+
+		await this.userService.update(adminUserId, { aiUserId: aiUser.id });
+		const updated = await this.userService.findOne(adminUserId);
+		if (!updated) {
+			throw new BadRequestException('换绑失败');
 		}
 		const { password: _, ...userInfo } = updated;
 		return {
