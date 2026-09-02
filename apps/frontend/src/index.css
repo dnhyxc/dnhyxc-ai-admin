@@ -151,3 +151,77 @@ html.dark .login-grid {
 		linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
 		linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
 }
+
+/* ===============================================================
+ * Recharts 图表（饼图 / 折线 / 面积）选中时去除蓝色 focus outline：
+ * - recharts-wrapper ：ResponsiveContainer 渲染的外层容器
+ * - recharts-surface ：图表 <svg>
+ * - recharts-legend / tooltip / default-tooltip-cursor / bar / sector / line
+ *   点击图例、tooltip 触发时也可能出现 outline
+ * 同时防止原生 svg / foreignObject 被点击时出现蓝色浏览器默认样式
+ * =============================================================== */
+.recharts-wrapper,
+.recharts-wrapper *,
+.recharts-surface,
+.recharts-surface *,
+.recharts-legend-item,
+.recharts-tooltip-wrapper,
+.recharts-tooltip-cursor,
+.recharts-default-tooltip,
+.recharts-cartesian-grid,
+.recharts-polar-grid,
+svg.recharts-surface,
+.recharts-brush,
+.recharts-brush-slide,
+.recharts-brush-traveller rect,
+.recharts-rectangle,
+.recharts-bar-rectangle,
+.recharts-pie-sector,
+.recharts-sector,
+.recharts-layer,
+.recharts-symbols,
+.recharts-dot,
+.recharts-active-dot,
+.recharts-reference-line,
+.recharts-reference-area,
+.recharts-label,
+.recharts-text,
+.recharts-xAxis .recharts-cartesian-axis-tick-value,
+.recharts-yAxis .recharts-cartesian-axis-tick-value,
+foreignObject,
+.ant-table-wrapper svg,
+svg {
+	outline: none !important;
+	box-shadow: none !important;
+}
+
+.recharts-wrapper:focus,
+.recharts-wrapper:focus-visible,
+.recharts-wrapper :focus,
+.recharts-wrapper :focus-visible,
+.recharts-surface:focus,
+.recharts-surface:focus-visible,
+.recharts-surface :focus,
+.recharts-surface :focus-visible,
+.ant-table-wrapper svg:focus,
+.ant-table-wrapper svg:focus-visible,
+foreignObject:focus,
+foreignObject:focus-visible {
+	outline: none !important;
+	box-shadow: none !important;
+	border-color: transparent !important;
+	-webkit-tap-highlight-color: transparent;
+}
+
+/* 图表容器外层的通用保护：避免用户点击图表容器 div 出现 focus 蓝框 */
+.dashboard-chart-host,
+.dashboard-chart-host:focus,
+.dashboard-chart-host:focus-visible,
+.dashboard-chart-host > *,
+.dashboard-chart-host > *:focus,
+.dashboard-chart-host > *:focus-visible {
+	outline: none !important;
+	box-shadow: none !important;
+	border-color: transparent !important;
+	-webkit-tap-highlight-color: transparent;
+}

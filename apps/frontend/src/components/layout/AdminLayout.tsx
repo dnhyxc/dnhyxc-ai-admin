@@ -12,7 +12,7 @@ import {
 	User as UserIcon,
 } from 'lucide-react';
 import { observer } from 'mobx-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router';
 import {
 	Button,
@@ -46,6 +46,11 @@ export const AdminLayout = observer(function AdminLayout() {
 	const location = useLocation();
 	const navigate = useNavigate();
 	const { authStore, noticeStore, themeStore } = useStore();
+
+	const greet = useMemo(() => {
+		const h = new Date().getHours();
+		return h < 11 ? '早上好' : h < 14 ? '中午好' : h < 18 ? '下午好' : '晚上好';
+	}, []);
 
 	const allowedPaths = collectAllowedPaths(authStore.userInfo?.roles);
 	const allowedPathKey = [...allowedPaths].sort().join(',');
@@ -248,7 +253,8 @@ export const AdminLayout = observer(function AdminLayout() {
 						<div>
 							<h1 className="text-lg font-semibold">{pageTitle}</h1>
 							<p className="text-xs text-muted-foreground">
-								欢迎使用 Dnhyxc AI 后台管理系统
+								{greet}，欢迎回来，
+								{authStore.userInfo?.username || '管理员'}.
 							</p>
 						</div>
 					</div>
