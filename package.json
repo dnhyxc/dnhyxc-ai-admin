@@ -4,8 +4,8 @@
 	"description": "dnhyxc-ai 配套后台管理系统：NestJS + React 前后端分离 monorepo，企业级多数据源（Admin 库 / AI 业务库）。",
 	"type": "module",
 	"scripts": {
-		"dev": "pnpm run server:dev & pnpm run dev:frontend",
-		"dev:frontend": "pnpm -C apps/frontend dev",
+		"dev:all": "pnpm run server:dev & pnpm run dev:frontend",
+		"dev": "pnpm -C apps/frontend dev",
 		"server:dev": "pnpm -C apps/backend start:dev",
 		"server:start": "pnpm -C apps/backend start",
 		"server:debug": "pnpm -C apps/backend start:debug",
