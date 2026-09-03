@@ -204,10 +204,10 @@ export class AuthService {
 		throw new HttpException('验证码错误', HttpStatus.BAD_REQUEST);
 	}
 
-	async sendChangePasswordCode(userId: number, dto: SendChangePasswordCodeDTO) {
-		const user = await this.userService.findOne(userId);
+	async sendChangePasswordCode(dto: SendChangePasswordCodeDTO) {
+		const user = await this.userService.findByEmail(dto.email);
 		if (!user) {
-			throw new HttpException('用户不存在', HttpStatus.BAD_REQUEST);
+			throw new HttpException('该邮箱未绑定任何账号', HttpStatus.BAD_REQUEST);
 		}
 		if (!user.email) {
 			throw new HttpException('账号未绑定邮箱', HttpStatus.BAD_REQUEST);
@@ -223,13 +223,13 @@ export class AuthService {
 		});
 	}
 
-	async changePassword(userId: number, dto: ChangePasswordDTO) {
+	async changePassword(dto: ChangePasswordDTO) {
 		const { email, verifyCode, verifyCodeKey, oldPassword, newPassword } = dto;
-		if (oldPassword === newPassword) {
+		if (oldPassword && oldPassword === newPassword) {
 			throw new HttpException('新密码不能与原密码相同', HttpStatus.BAD_REQUEST);
 		}
 
-		const user = await this.userService.findOne(userId);
+		const user = await this.userService.findByEmail(email);
 		if (!user) {
 			throw new HttpException('用户不存在', HttpStatus.BAD_REQUEST);
 		}
@@ -239,18 +239,22 @@ export class AuthService {
 
 		await this.verifyEmail(verifyCodeKey, verifyCode);
 
-		const isPasswordValid = await comparePassword(oldPassword, user.password);
-		if (!isPasswordValid) {
-			throw new HttpException('原密码错误', HttpStatus.BAD_REQUEST);
+		// 有 oldPassword 时校验旧密码（登录态修改密码场景）；
+		// 忘记密码场景不传 oldPassword，仅凭邮箱验证码完成身份验证。
+		if (oldPassword) {
+			const isPasswordValid = await comparePassword(oldPassword, user.password);
+			if (!isPasswordValid) {
+				throw new HttpException('原密码错误', HttpStatus.BAD_REQUEST);
+			}
 		}
 
-		await this.userService.update(userId, { password: newPassword });
+		await this.userService.update(user.id, { password: newPassword });
 		await this.cache.del(verifyCodeKey);
 
 		await this.logsService.create({
 			path: '/api/auth/changePassword',
 			method: 'POST',
-			data: JSON.stringify({ userId }),
+			data: JSON.stringify({ userId: user.id }),
 			result: 200,
 			action: 'changePassword',
 			user,

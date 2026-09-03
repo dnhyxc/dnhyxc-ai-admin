@@ -19,7 +19,13 @@ import { observer } from 'mobx-react';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { resolveHomePath } from '@/router/menu';
-import { captchaApi, loginApi, registerApi } from '@/service';
+import {
+	captchaApi,
+	changePasswordApi,
+	loginApi,
+	registerApi,
+	sendChangePasswordCodeApi,
+} from '@/service';
 import { useStore } from '@/store';
 
 type AuthTab = 'login' | 'register';
@@ -34,6 +40,18 @@ export const LoginPage = observer(function LoginPage() {
 	const [captchaId, setCaptchaId] = useState('');
 	const [captchaSvg, setCaptchaSvg] = useState('');
 	const [loading, setLoading] = useState(false);
+	const [forgotMode, setForgotMode] = useState(false);
+	const [forgotSubmitting, setForgotSubmitting] = useState(false);
+	const [forgotSending, setForgotSending] = useState(false);
+	const [forgotCountdown, setForgotCountdown] = useState(0);
+	const [forgotVerifyKey, setForgotVerifyKey] = useState('');
+	const [forgotForm] = Form.useForm<{
+		username: string;
+		email: string;
+		verifyCode: string;
+		newPassword: string;
+		confirmPassword: string;
+	}>();
 
 	const goAfterAuth = () => {
 		if (authStore.needsAiBind) {
@@ -54,6 +72,68 @@ export const LoginPage = observer(function LoginPage() {
 		const data = res.data as { captchaId: string; captchaSvg: string };
 		setCaptchaId(data.captchaId);
 		setCaptchaSvg(data.captchaSvg);
+	};
+
+	useEffect(() => {
+		if (forgotCountdown <= 0) return;
+		const timer = window.setTimeout(
+			() => setForgotCountdown((c) => c - 1),
+			1000,
+		);
+		return () => window.clearTimeout(timer);
+	}, [forgotCountdown]);
+
+	const sendForgotCode = async () => {
+		const email = await forgotForm
+			.validateFields(['email'])
+			.then((v) => v.email);
+		setForgotSending(true);
+		try {
+			const res = await sendChangePasswordCodeApi({ email });
+			const key = (res.data as { key: string })?.key;
+			if (!key) {
+				message.error('验证码发送失败');
+				return;
+			}
+			setForgotVerifyKey(key);
+			message.success('验证码已发送，请查收邮箱');
+			setForgotCountdown(60);
+		} finally {
+			setForgotSending(false);
+		}
+	};
+
+	const onForgotSubmit = async (values: {
+		username: string;
+		email: string;
+		verifyCode: string;
+		newPassword: string;
+	}) => {
+		if (!forgotVerifyKey) {
+			message.error('请先获取邮箱验证码');
+			return;
+		}
+		setForgotSubmitting(true);
+		try {
+			// 忘记密码场景：不传 oldPassword，仅凭邮箱验证码完成身份验证。
+			await changePasswordApi({
+				email: values.email,
+				verifyCode: Number(values.verifyCode),
+				verifyCodeKey: forgotVerifyKey,
+				newPassword: values.newPassword,
+			});
+			message.success('密码重置成功，请使用新密码登录');
+			setForgotMode(false);
+			forgotForm.resetFields();
+			setForgotVerifyKey('');
+			loginForm.setFieldsValue({
+				username: values.username,
+				password: undefined,
+			});
+			loadCaptcha();
+		} finally {
+			setForgotSubmitting(false);
+		}
 	};
 
 	useEffect(() => {
@@ -310,206 +390,365 @@ export const LoginPage = observer(function LoginPage() {
 								level={4}
 								style={{ margin: 0, color: token.colorTextHeading }}
 							>
-								{tab === 'login' ? '欢迎回来' : '创建新账号'}
+								{forgotMode
+									? '重置密码'
+									: tab === 'login'
+										? '欢迎回来'
+										: '创建新账号'}
 							</Typography.Title>
 							<Typography.Text type="secondary" style={{ fontSize: 12 }}>
-								{tab === 'login'
-									? '请输入账号信息登录管理后台'
-									: '仅需 30 秒，注册属于你的管理员账号'}
+								{forgotMode
+									? '请输入账号绑定的邮箱，获取验证码后设置新密码'
+									: tab === 'login'
+										? '请输入账号信息登录管理后台'
+										: '仅需 30 秒，注册属于你的管理员账号'}
 							</Typography.Text>
 						</Space>
 
-						<Tabs
-							style={{ marginBottom: 0 }}
-							activeKey={tab}
-							onChange={(key) => {
-								setTab(key as AuthTab);
-								refreshCaptcha();
-							}}
-							items={[
-								{
-									key: 'login',
-									label: '登录',
-									children: (
-										<Form
-											form={loginForm}
-											layout="vertical"
-											onFinish={onLogin}
-											requiredMark={false}
-										>
-											<Form.Item
-												name="username"
-												label={<span style={{ fontSize: 12 }}>用户名</span>}
-												rules={[{ required: true, message: '请输入用户名' }]}
-												style={{ marginBottom: 8 }}
+						{!forgotMode && (
+							<Tabs
+								style={{ marginBottom: 0 }}
+								activeKey={tab}
+								onChange={(key) => {
+									setTab(key as AuthTab);
+									refreshCaptcha();
+								}}
+								items={[
+									{
+										key: 'login',
+										label: '登录',
+										children: (
+											<Form
+												form={loginForm}
+												layout="vertical"
+												onFinish={onLogin}
+												requiredMark={false}
 											>
-												<Input
-													prefix={<UserOutlined />}
-													autoComplete="username"
-													size="middle"
-													placeholder="请输入用户名"
-												/>
-											</Form.Item>
-											<Form.Item
-												name="password"
-												label={<span style={{ fontSize: 12 }}>密码</span>}
-												rules={[{ required: true, message: '请输入密码' }]}
-												style={{ marginBottom: 8 }}
-											>
-												<Input.Password
-													prefix={<LockOutlined />}
-													autoComplete="current-password"
-													size="middle"
-													placeholder="请输入密码"
-												/>
-											</Form.Item>
-											<Form.Item
-												name="captchaText"
-												label={<span style={{ fontSize: 12 }}>验证码</span>}
-												rules={[{ required: true, message: '请输入验证码' }]}
-												style={{ marginBottom: 12 }}
-											>
-												<Space.Compact style={{ width: '100%' }}>
+												<Form.Item
+													name="username"
+													label={<span style={{ fontSize: 14 }}>用户名</span>}
+													rules={[{ required: true, message: '请输入用户名' }]}
+													style={{ marginBottom: 15 }}
+												>
 													<Input
-														prefix={<SafetyOutlined />}
+														prefix={<UserOutlined />}
+														autoComplete="username"
 														size="middle"
-														style={{ flex: 1 }}
-														placeholder="请输入验证码"
+														placeholder="请输入用户名"
 													/>
-													{captchaAddon}
-												</Space.Compact>
-											</Form.Item>
-											<Button
-												type="primary"
-												htmlType="submit"
-												block
-												size="middle"
-												loading={loading}
-												style={{ height: 38 }}
-											>
-												登录
-											</Button>
-										</Form>
-									),
-								},
-								{
-									key: 'register',
-									label: '注册',
-									children: (
-										<Form
-											form={registerForm}
-											layout="vertical"
-											onFinish={onRegister}
-											requiredMark={false}
-										>
-											<Form.Item
-												name="username"
-												label={<span style={{ fontSize: 12 }}>用户名</span>}
-												rules={[
-													{ required: true, message: '请输入用户名' },
-													{ min: 2, max: 20, message: '用户名 2-20 个字符' },
-												]}
-												style={{ marginBottom: 8 }}
-											>
-												<Input
-													prefix={<UserOutlined />}
-													autoComplete="username"
+												</Form.Item>
+												<Form.Item
+													name="password"
+													label={<span style={{ fontSize: 14 }}>密码</span>}
+													rules={[{ required: true, message: '请输入密码' }]}
+													style={{ marginBottom: 15 }}
+												>
+													<Input.Password
+														prefix={<LockOutlined />}
+														autoComplete="current-password"
+														size="middle"
+														placeholder="请输入密码"
+													/>
+												</Form.Item>
+												<Form.Item
+													name="captchaText"
+													label={<span style={{ fontSize: 14 }}>验证码</span>}
+													rules={[{ required: true, message: '请输入验证码' }]}
+													style={{ marginBottom: 15 }}
+												>
+													<Space.Compact style={{ width: '100%' }}>
+														<Input
+															prefix={<SafetyOutlined />}
+															size="middle"
+															style={{ flex: 1 }}
+															placeholder="请输入验证码"
+														/>
+														{captchaAddon}
+													</Space.Compact>
+												</Form.Item>
+
+												<Button
+													type="primary"
+													htmlType="submit"
+													block
 													size="middle"
-													placeholder="请输入用户名"
-												/>
-											</Form.Item>
-											<Form.Item
-												name="email"
-												label={<span style={{ fontSize: 12 }}>邮箱</span>}
-												rules={[
-													{ required: true, message: '请输入邮箱' },
-													{ type: 'email', message: '邮箱格式不正确' },
-												]}
-												style={{ marginBottom: 8 }}
-											>
-												<Input
-													prefix={<MailOutlined />}
-													autoComplete="email"
-													size="middle"
-													placeholder="请输入邮箱"
-												/>
-											</Form.Item>
-											<Form.Item
-												name="password"
-												label={<span style={{ fontSize: 12 }}>密码</span>}
-												rules={[
-													{ required: true, message: '请输入密码' },
-													{ min: 6, max: 32, message: '密码 6-32 个字符' },
-												]}
-												style={{ marginBottom: 8 }}
-											>
-												<Input.Password
-													prefix={<LockOutlined />}
-													autoComplete="new-password"
-													size="middle"
-													placeholder="请输入密码"
-												/>
-											</Form.Item>
-											<Form.Item
-												name="confirmPassword"
-												label={<span style={{ fontSize: 12 }}>确认密码</span>}
-												dependencies={['password']}
-												rules={[
-													{ required: true, message: '请再次输入密码' },
-													({ getFieldValue }) => ({
-														validator(_, value) {
-															if (
-																!value ||
-																getFieldValue('password') === value
-															) {
-																return Promise.resolve();
+													loading={loading}
+													style={{ height: 38 }}
+												>
+													登录
+												</Button>
+												<div className="mt-2 text-right">
+													<Button
+														type="link"
+														size="small"
+														className="p-0! text-sm! h-auto!"
+														onClick={() => {
+															const username =
+																loginForm.getFieldValue('username');
+															forgotForm.resetFields();
+															setForgotVerifyKey('');
+															if (username) {
+																forgotForm.setFieldsValue({ username });
 															}
-															return Promise.reject(
-																new Error('两次输入的密码不一致'),
-															);
-														},
-													}),
-												]}
-												style={{ marginBottom: 8 }}
+															setForgotMode(true);
+														}}
+													>
+														忘记密码
+													</Button>
+												</div>
+											</Form>
+										),
+									},
+									{
+										key: 'register',
+										label: '注册',
+										children: (
+											<Form
+												form={registerForm}
+												layout="vertical"
+												onFinish={onRegister}
+												requiredMark={false}
 											>
-												<Input.Password
-													prefix={<LockOutlined />}
-													autoComplete="new-password"
-													size="middle"
-													placeholder="请再次输入密码"
-												/>
-											</Form.Item>
-											<Form.Item
-												name="captchaText"
-												label={<span style={{ fontSize: 12 }}>验证码</span>}
-												rules={[{ required: true, message: '请输入验证码' }]}
-												style={{ marginBottom: 12 }}
-											>
-												<Space.Compact style={{ width: '100%' }}>
+												<Form.Item
+													name="username"
+													label={<span style={{ fontSize: 14 }}>用户名</span>}
+													rules={[
+														{ required: true, message: '请输入用户名' },
+														{ min: 2, max: 20, message: '用户名 2-20 个字符' },
+													]}
+													style={{ marginBottom: 15 }}
+												>
 													<Input
-														prefix={<SafetyOutlined />}
+														prefix={<UserOutlined />}
+														autoComplete="username"
 														size="middle"
-														style={{ flex: 1 }}
-														placeholder="请输入验证码"
+														placeholder="请输入用户名"
 													/>
-													{captchaAddon}
-												</Space.Compact>
-											</Form.Item>
-											<Button
-												type="primary"
-												htmlType="submit"
-												block
-												size="middle"
-												loading={loading}
-												style={{ height: 38 }}
-											>
-												注册
-											</Button>
-										</Form>
-									),
-								},
-							]}
-						/>
+												</Form.Item>
+												<Form.Item
+													name="email"
+													label={<span style={{ fontSize: 14 }}>邮箱</span>}
+													rules={[
+														{ required: true, message: '请输入邮箱' },
+														{ type: 'email', message: '邮箱格式不正确' },
+													]}
+													style={{ marginBottom: 15 }}
+												>
+													<Input
+														prefix={<MailOutlined />}
+														autoComplete="email"
+														size="middle"
+														placeholder="请输入邮箱"
+													/>
+												</Form.Item>
+												<Form.Item
+													name="password"
+													label={<span style={{ fontSize: 14 }}>密码</span>}
+													rules={[
+														{ required: true, message: '请输入密码' },
+														{ min: 6, max: 32, message: '密码 6-32 个字符' },
+													]}
+													style={{ marginBottom: 15 }}
+												>
+													<Input.Password
+														prefix={<LockOutlined />}
+														autoComplete="new-password"
+														size="middle"
+														placeholder="请输入密码"
+													/>
+												</Form.Item>
+												<Form.Item
+													name="confirmPassword"
+													label={<span style={{ fontSize: 14 }}>确认密码</span>}
+													dependencies={['password']}
+													rules={[
+														{ required: true, message: '请再次输入密码' },
+														({ getFieldValue }) => ({
+															validator(_, value) {
+																if (
+																	!value ||
+																	getFieldValue('password') === value
+																) {
+																	return Promise.resolve();
+																}
+																return Promise.reject(
+																	new Error('两次输入的密码不一致'),
+																);
+															},
+														}),
+													]}
+													style={{ marginBottom: 15 }}
+												>
+													<Input.Password
+														prefix={<LockOutlined />}
+														autoComplete="new-password"
+														size="middle"
+														placeholder="请再次输入密码"
+													/>
+												</Form.Item>
+												<Form.Item
+													name="captchaText"
+													label={<span style={{ fontSize: 14 }}>验证码</span>}
+													rules={[{ required: true, message: '请输入验证码' }]}
+													style={{ marginBottom: 15 }}
+												>
+													<Space.Compact style={{ width: '100%' }}>
+														<Input
+															prefix={<SafetyOutlined />}
+															size="middle"
+															style={{ flex: 1 }}
+															placeholder="请输入验证码"
+														/>
+														{captchaAddon}
+													</Space.Compact>
+												</Form.Item>
+												<Button
+													type="primary"
+													htmlType="submit"
+													block
+													size="middle"
+													loading={loading}
+													style={{ height: 38 }}
+												>
+													注册
+												</Button>
+											</Form>
+										),
+									},
+								]}
+							/>
+						)}
+
+						{forgotMode && (
+							<Form
+								form={forgotForm}
+								layout="vertical"
+								onFinish={onForgotSubmit}
+								requiredMark={false}
+							>
+								<Form.Item
+									name="username"
+									label={<span style={{ fontSize: 14 }}>用户名</span>}
+									rules={[
+										{ required: true, message: '请输入用户名' },
+										{ min: 2, max: 20, message: '用户名 2-20 个字符' },
+									]}
+									style={{
+										marginBottom: 15,
+									}}
+								>
+									<Input
+										placeholder="请输入账号用户名"
+										autoComplete="username"
+									/>
+								</Form.Item>
+								<Form.Item
+									name="email"
+									label={<span style={{ fontSize: 14 }}>绑定邮箱</span>}
+									rules={[
+										{ required: true, message: '请输入绑定邮箱' },
+										{ type: 'email', message: '邮箱格式不正确' },
+									]}
+									style={{ marginBottom: 15 }}
+								>
+									<Input
+										placeholder="请输入账号绑定邮箱"
+										autoComplete="email"
+									/>
+								</Form.Item>
+								<Form.Item
+									label={<span style={{ fontSize: 14 }}>邮箱验证码</span>}
+									required
+									style={{ marginBottom: 15 }}
+								>
+									<Space.Compact style={{ width: '100%' }}>
+										<Form.Item
+											name="verifyCode"
+											noStyle
+											rules={[
+												{ required: true, message: '请输入邮箱验证码' },
+												{ len: 6, message: '验证码为 6 位' },
+											]}
+										>
+											<Input
+												placeholder="请输入 6 位验证码"
+												maxLength={6}
+												autoComplete="one-time-code"
+											/>
+										</Form.Item>
+										<Button
+											disabled={forgotCountdown > 0}
+											loading={forgotSending}
+											onClick={sendForgotCode}
+										>
+											{forgotCountdown > 0
+												? `${forgotCountdown}s`
+												: '获取验证码'}
+										</Button>
+									</Space.Compact>
+								</Form.Item>
+								<Form.Item
+									name="newPassword"
+									label={<span style={{ fontSize: 14 }}>新密码</span>}
+									rules={[
+										{ required: true, message: '请输入新密码' },
+										{ min: 6, max: 32, message: '密码 6-32 个字符' },
+									]}
+									style={{ marginBottom: 15 }}
+								>
+									<Input.Password
+										placeholder="请输入新密码"
+										autoComplete="new-password"
+									/>
+								</Form.Item>
+								<Form.Item
+									name="confirmPassword"
+									label={<span style={{ fontSize: 12 }}>确认新密码</span>}
+									dependencies={['newPassword']}
+									rules={[
+										{ required: true, message: '请再次输入新密码' },
+										({ getFieldValue }) => ({
+											validator(_, value) {
+												if (!value || getFieldValue('newPassword') === value) {
+													return Promise.resolve();
+												}
+												return Promise.reject(
+													new Error('两次输入的新密码不一致'),
+												);
+											},
+										}),
+									]}
+									style={{ marginBottom: 15 }}
+								>
+									<Input.Password
+										placeholder="请再次输入新密码"
+										autoComplete="new-password"
+									/>
+								</Form.Item>
+								<Button
+									type="primary"
+									block
+									htmlType="submit"
+									loading={forgotSubmitting}
+									style={{ height: 38 }}
+								>
+									确认重置
+								</Button>
+								<div className="mt-2 text-right">
+									<Button
+										type="link"
+										className="p-0! text-sm! h-auto!"
+										onClick={() => {
+											setForgotMode(false);
+											forgotForm.resetFields();
+											setForgotVerifyKey('');
+										}}
+									>
+										返回登录
+									</Button>
+								</div>
+							</Form>
+						)}
 					</div>
 				</div>
 			</Card>

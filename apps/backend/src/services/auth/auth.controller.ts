@@ -43,27 +43,13 @@ export class AuthController {
 	}
 
 	@Post('/sendChangePasswordCode')
-	@UseGuards(JwtGuard)
-	sendChangePasswordCode(
-		@Req() req: Request & { user?: { userId?: number } },
-		@Body() dto: SendChangePasswordCodeDTO,
-	) {
-		const userId = req.user?.userId;
-		if (!userId) return null;
-		return this.authService.sendChangePasswordCode(userId, dto);
+	sendChangePasswordCode(@Body() dto: SendChangePasswordCodeDTO) {
+		return this.authService.sendChangePasswordCode(dto);
 	}
 
 	@Post('/changePassword')
-	@UseGuards(JwtGuard)
-	changePassword(
-		@Req() req: Request & { user?: { userId?: number } },
-		@Body() dto: ChangePasswordDTO,
-	) {
-		const userId = req.user?.userId;
-		if (!userId) {
-			return null;
-		}
-		return this.authService.changePassword(userId, dto);
+	changePassword(@Body() dto: ChangePasswordDTO) {
+		return this.authService.changePassword(dto);
 	}
 
 	@Get('/profile')

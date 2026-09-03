@@ -22,7 +22,7 @@ export const changePasswordApi = (data: {
 	email: string;
 	verifyCode: number;
 	verifyCodeKey: string;
-	oldPassword: string;
+	oldPassword?: string;
 	newPassword: string;
 }) => http.post(API.changePassword, { data });
 
