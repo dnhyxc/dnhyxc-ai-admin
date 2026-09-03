@@ -12,6 +12,7 @@
 		"server:prod": "pnpm -C apps/backend start:prod",
 		"server:build": "pnpm -C apps/backend build",
 		"build:frontend": "pnpm -C apps/frontend build",
+		"deploy": "pnpm -C apps/frontend run deploy",
 		"check": "biome check --write",
 		"check:staged": "biome check --staged --no-errors-on-unmatched",
 		"format": "biome format --write",
