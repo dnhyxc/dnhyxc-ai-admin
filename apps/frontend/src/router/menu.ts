@@ -2,6 +2,7 @@ import type { LucideIcon } from 'lucide-react';
 import {
 	BookOpen,
 	Bot,
+	CalendarDays,
 	Database,
 	FileText,
 	LayoutDashboard,
@@ -38,6 +39,7 @@ export const menuItems: MenuEntry[] = [
 		children: [
 			{ path: '/ai-users', label: '用户管理', icon: Bot },
 			{ path: '/ai-ebooks', label: '书籍管理', icon: BookOpen },
+			{ path: '/ai-daily-reading', label: '日推管理', icon: CalendarDays },
 			{ path: '/ai-knowledge', label: '知识管理', icon: Database },
 			{ path: '/ai-learning-note', label: '学习笔记', icon: NotebookPen },
 			{ path: '/ai-logs', label: '日志管理', icon: ScrollText },

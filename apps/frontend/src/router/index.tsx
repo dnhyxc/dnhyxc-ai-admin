@@ -2,6 +2,8 @@ import { createBrowserRouter, Navigate } from 'react-router';
 import { AdminLayout } from '@/components/layout/AdminLayout';
 import { resolveHomePath } from '@/router/menu';
 import { store } from '@/store';
+import { AiDailyReadingDetailPage } from '@/views/ai-daily-reading/AiDailyReadingDetailPage';
+import { AiDailyReadingPage } from '@/views/ai-daily-reading/AiDailyReadingPage';
 import { AiEbooksPage } from '@/views/ai-ebooks/AiEbooksPage';
 import { AiKnowledgePage } from '@/views/ai-knowledge/AiKnowledgePage';
 import { AiLearningNotePage } from '@/views/ai-learning-note/AiLearningNotePage';
@@ -78,6 +80,11 @@ export const router = createBrowserRouter([
 			{ path: 'menus', element: <MenusPage /> },
 			{ path: 'ai-users', element: <AiUsersPage /> },
 			{ path: 'ai-ebooks', element: <AiEbooksPage /> },
+			{ path: 'ai-daily-reading', element: <AiDailyReadingPage /> },
+			{
+				path: 'ai-daily-reading/:publishDate',
+				element: <AiDailyReadingDetailPage />,
+			},
 			{ path: 'ai-knowledge', element: <AiKnowledgePage /> },
 			{ path: 'ai-logs', element: <AiLogsPage /> },
 			{ path: 'ai-learning-note', element: <AiLearningNotePage /> },

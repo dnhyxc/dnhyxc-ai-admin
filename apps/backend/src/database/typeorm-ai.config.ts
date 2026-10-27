@@ -2,6 +2,8 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { TypeOrmModuleOptions, TypeOrmOptionsFactory } from '@nestjs/typeorm';
 import { AiDbEnum } from '../enum/config.enum';
+import { AiDailyReading } from '../services/ai-daily-reading/ai-daily-reading.entity';
+import { AiDailyReadingAttempt } from '../services/ai-daily-reading/ai-daily-reading-attempt.entity';
 import { AiEbookBook } from '../services/ai-ebook/ai-ebook-book.entity';
 import { AiKnowledge } from '../services/ai-knowledge/ai-knowledge.entity';
 import { AiKnowledgeTrash } from '../services/ai-knowledge/ai-knowledge-trash.entity';
@@ -59,6 +61,8 @@ export class TypeOrmAiConfigService implements TypeOrmOptionsFactory {
 				AiKnowledge,
 				AiKnowledgeTrash,
 				AiLearningNote,
+				AiDailyReading,
+				AiDailyReadingAttempt,
 			],
 			// 企业级硬约束：业务库禁止自动同步
 			synchronize: false,

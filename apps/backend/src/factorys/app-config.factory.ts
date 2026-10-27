@@ -43,6 +43,8 @@ export const appConfig = () => ({
 		REDIS_USERNAME: Joi.string().optional().allow(''),
 		EMAIL_TRANSPORT: Joi.string().required(),
 		EMAIL_FROM: Joi.string().email().required(),
+		DAILY_READING_INTERNAL_BASE_URL: Joi.string().uri().optional().allow(''),
+		DAILY_READING_INTERNAL_TOKEN: Joi.string().optional().allow(''),
 	}),
 });
 

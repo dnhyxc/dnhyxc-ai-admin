@@ -10,6 +10,7 @@
 | [ai-ebook](./ai-ebook/) | AI 电子书管理（只读管理 AI 业务库书籍、按账号隔离） | [AI 电子书管理实现](./ai-ebook/ai-ebook-management.md)、[书籍按账号隔离](./ai-ebook/书籍按账号隔离.md) |
 | [knowledge](./knowledge/) | AI 知识库管理（知识库主表 + 回收站表双表只读管理、软删事务、权限隔离） | [知识库管理模块](./knowledge/知识库管理模块.md) |
 | [ai-learning-note](./ai-learning-note/) | AI 学习笔记（只读管理英语学习笔记、按账号隔离、富文本预览） | [学习笔记管理](./ai-learning-note/学习笔记管理.md) |
+| [ai-daily-reading](./ai-daily-reading/) | AI 日推管理（系统日推成功/缺口列表、详情释义、删除、补生成） | [日推管理](./ai-daily-reading/日推管理.md) |
 | [ai-logs](./ai-logs/) | AI 日志管理（查看和删除 AI 业务库操作日志） | [AI 日志管理实现](./ai-logs/ai-logs-management.md) |
 | [dashboard](./dashboard/) | 仪表盘（集成双库数据的可视化统计，仅超管可见） | [仪表盘实现](./dashboard/dashboard-overview.md)、[仪表盘访问策略调整](./dashboard/仪表盘访问策略调整.md) |
 | [ui](./ui/) | UI 组件库（基于 Radix UI 的基础组件封装、全局表格样式、Loading 动画、全角表格圆角） | [UI 组件库实现](./ui/ui-components.md)、[表格顶部圆角去除](./ui/表格顶部圆角去除.md)、[Loading 组件](./ui/Loading%20组件.md)、[表格圆角样式调整](./ui/表格圆角样式调整.md) |

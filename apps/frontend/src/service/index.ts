@@ -102,6 +102,18 @@ export const deleteAiLogsApi = (ids: number[]) =>
 export const getAiEbooksApi = (querys?: Record<string, any>) =>
 	http.get(API.aiEbooks, { querys, silent: true });
 
+export const getAiDailyReadingsApi = (querys?: { kind?: 'gap' | 'ready' }) =>
+	http.get(API.aiDailyReadings, { querys, silent: true });
+
+export const getAiDailyReadingApi = (publishDate: string) =>
+	http.get(`${API.aiDailyReadings}/${publishDate}`, { silent: true });
+
+export const deleteAiDailyReadingApi = (publishDate: string) =>
+	http.delete(`${API.aiDailyReadings}/${publishDate}`);
+
+export const backfillAiDailyReadingApi = (publishDate: string) =>
+	http.post(`${API.aiDailyReadings}/${publishDate}/backfill`, { data: {} });
+
 export const getAiKnowledgeApi = (querys?: Record<string, any>) =>
 	http.get(API.aiKnowledge, { querys, silent: true });
 

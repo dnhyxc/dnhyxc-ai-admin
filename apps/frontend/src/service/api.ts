@@ -29,6 +29,7 @@ export const API = {
 	deleteAiLog: '/ai-logs/deleteLog',
 	deleteAiLogs: '/ai-logs/deleteLogs',
 	aiEbooks: '/ai-ebook/getBooks',
+	aiDailyReadings: '/ai-daily-reading',
 	aiKnowledge: '/ai-knowledge/getKnowledgeBases',
 	aiKnowledgeTrash: '/ai-knowledge/getKnowledgeTrash',
 	deleteAiKnowledge: '/ai-knowledge/deleteKnowledge',

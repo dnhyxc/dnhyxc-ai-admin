@@ -4,6 +4,7 @@ import { ConfigModule } from '@nestjs/config';
 import { AI_DB_ENABLED, DatabaseModule } from './database/database.module';
 import { appConfig } from './factorys/app-config.factory';
 import { RedisConfigFactory } from './factorys/redis-config.factory';
+import { AiDailyReadingModule } from './services/ai-daily-reading/ai-daily-reading.module';
 import { AiEbookModule } from './services/ai-ebook/ai-ebook.module';
 import { AiKnowledgeModule } from './services/ai-knowledge/ai-knowledge.module';
 import { AiLearningNoteModule } from './services/ai-learning-note/ai-learning-note.module';
@@ -42,6 +43,7 @@ import { UserModule } from './services/user/user.module';
 					AiUserModule,
 					AiLogsModule,
 					AiEbookModule,
+					AiDailyReadingModule,
 					AiKnowledgeModule,
 					AiLearningNoteModule,
 				]
