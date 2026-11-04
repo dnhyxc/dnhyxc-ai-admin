@@ -9,6 +9,7 @@ import { AiEbookModule } from './services/ai-ebook/ai-ebook.module';
 import { AiKnowledgeModule } from './services/ai-knowledge/ai-knowledge.module';
 import { AiLearningNoteModule } from './services/ai-learning-note/ai-learning-note.module';
 import { AiLogsModule } from './services/ai-logs/ai-logs.module';
+import { AiShareModule } from './services/ai-share/ai-share.module';
 import { AiUserModule } from './services/ai-user/ai-user.module';
 import { AuthModule } from './services/auth/auth.module';
 import { DashboardModule } from './services/dashboard/dashboard.module';
@@ -46,6 +47,7 @@ import { UserModule } from './services/user/user.module';
 					AiDailyReadingModule,
 					AiKnowledgeModule,
 					AiLearningNoteModule,
+					AiShareModule,
 				]
 			: []),
 	],

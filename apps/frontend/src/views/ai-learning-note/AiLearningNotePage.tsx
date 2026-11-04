@@ -1,7 +1,6 @@
 import {
 	Button,
 	Input,
-	Modal,
 	message,
 	Popconfirm,
 	Space,
@@ -11,6 +10,7 @@ import {
 } from 'antd';
 import { observer } from 'mobx-react';
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router';
 import { DEFAULT_PAGE_SIZE, tablePagination } from '@/lib/table-pagination';
 import { deleteAiLearningNoteApi, getAiLearningNotesApi } from '@/service';
 import { useStore } from '@/store';
@@ -36,13 +36,13 @@ function formatTime(v?: string | null) {
 
 export const AiLearningNotePage = observer(function AiLearningNotePage() {
 	const { authStore, noticeStore } = useStore();
+	const navigate = useNavigate();
 	const isAdmin = authStore.isSuperAdmin;
 	const [list, setList] = useState<LearningNoteRow[]>([]);
 	const [total, setTotal] = useState(0);
 	const [pageNo, setPageNo] = useState(1);
 	const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
 	const [title, setTitle] = useState('');
-	const [previewContent, setPreviewContent] = useState<string | null>(null);
 
 	const load = async (page = pageNo, size = pageSize) => {
 		noticeStore.setPageLoading(true);
@@ -111,16 +111,15 @@ export const AiLearningNotePage = observer(function AiLearningNotePage() {
 		{
 			title: '操作',
 			key: 'action',
-			width: 100,
+			width: 120,
 			fixed: 'right' as const,
 			render: (_: unknown, r: LearningNoteRow) => (
 				<Space>
 					<Button
 						type="link"
 						size="small"
-						disabled={!r.content}
 						className="px-0!"
-						onClick={() => setPreviewContent(r.content)}
+						onClick={() => navigate(`/ai-learning-note/${r.id}`)}
 					>
 						查看
 					</Button>
@@ -132,7 +131,7 @@ export const AiLearningNotePage = observer(function AiLearningNotePage() {
 							load(pageNo, pageSize);
 						}}
 					>
-						<Button danger type="link" size="small">
+						<Button danger type="link" size="small" className="px-0!">
 							删除
 						</Button>
 					</Popconfirm>
@@ -178,22 +177,6 @@ export const AiLearningNotePage = observer(function AiLearningNotePage() {
 					columns={columns}
 				/>
 			</div>
-
-			<Modal
-				title="笔记内容"
-				open={previewContent !== null}
-				onCancel={() => setPreviewContent(null)}
-				footer={null}
-				width={800}
-				styles={{ body: { maxHeight: '70vh', overflow: 'auto' } }}
-			>
-				{previewContent !== null && (
-					<div
-						className="prose prose-sm max-w-none"
-						dangerouslySetInnerHTML={{ __html: previewContent }}
-					/>
-				)}
-			</Modal>
 		</div>
 	);
 });

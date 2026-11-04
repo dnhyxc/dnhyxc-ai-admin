@@ -225,3 +225,226 @@ foreignObject:focus-visible {
 	border-color: transparent !important;
 	-webkit-tap-highlight-color: transparent;
 }
+
+/* TipTap / 学习笔记富文本 HTML 预览 */
+.admin-rich-text {
+	color: var(--color-foreground);
+	line-height: 1.7;
+	word-break: break-word;
+}
+.admin-rich-text :where(p, ul, ol, blockquote, pre, table, h1, h2, h3, h4) {
+	margin: 0.75em 0;
+}
+.admin-rich-text :where(h1, h2, h3, h4) {
+	font-weight: 600;
+	line-height: 1.35;
+}
+.admin-rich-text h1 {
+	font-size: 1.5rem;
+}
+.admin-rich-text h2 {
+	font-size: 1.25rem;
+}
+.admin-rich-text h3 {
+	font-size: 1.1rem;
+}
+.admin-rich-text :where(ul, ol) {
+	padding-left: 1.5em;
+}
+.admin-rich-text a {
+	color: var(--color-primary);
+	text-decoration: underline;
+}
+.admin-rich-text img {
+	max-width: 100%;
+	height: auto;
+}
+.admin-rich-text blockquote {
+	border-left: 3px solid var(--color-border);
+	padding-left: 0.75em;
+	color: color-mix(in srgb, var(--color-foreground) 72%, transparent);
+}
+.admin-rich-text :where(code) {
+	font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+	font-size: 0.875em;
+	padding: 0.1em 0.35em;
+	border-radius: 4px;
+	background: color-mix(in srgb, var(--color-foreground) 8%, transparent);
+}
+.admin-rich-text pre {
+	overflow-x: auto;
+	padding: 0.75em 1em;
+	border-radius: 6px;
+	background: color-mix(in srgb, var(--color-foreground) 6%, transparent);
+}
+.admin-rich-text pre code {
+	padding: 0;
+	background: transparent;
+}
+.admin-rich-text table {
+	width: 100%;
+	border-collapse: collapse;
+}
+.admin-rich-text :where(th, td) {
+	border: 1px solid var(--color-border);
+	padding: 0.4em 0.6em;
+}
+
+/*
+ * markdown-kit 的 github-markdown 字色绑在 prefers-color-scheme 上，
+ * admin 主题走 html.dark；这里把 .markdown-body token 改绑到 admin CSS 变量，
+ * 避免系统深色 + 后台浅色（或反过来）时正文发白/发黑看不清。
+ */
+.admin-md-preview .markdown-body {
+	color-scheme: light;
+	--fgColor-default: var(--color-foreground);
+	--fgColor-muted: var(--color-muted-foreground);
+	--fgColor-accent: var(--color-primary);
+	--bgColor-default: transparent;
+	--bgColor-muted: var(--color-muted);
+	--bgColor-neutral-muted: color-mix(in srgb, var(--color-muted) 55%, transparent);
+	--borderColor-default: var(--color-border);
+	--borderColor-muted: var(--color-border);
+	--borderColor-neutral-muted: var(--color-border);
+	--borderColor-accent-emphasis: var(--color-primary);
+	color: var(--color-foreground);
+	background-color: transparent;
+}
+
+html.dark .admin-md-preview .markdown-body {
+	color-scheme: dark;
+}
+
+/*
+ * 围栏代码块工具栏样式（Host index.css 同源）。
+ * markdown-kit 只输出 DOM，样式在宿主；admin 此前未引入导致「js / 复制下载」裸排。
+ */
+.admin-md-preview .chat-md-code-block {
+	position: relative;
+	margin: 0.75rem 0;
+	border: 1px solid color-mix(in srgb, var(--color-primary) 12%, transparent);
+	border-radius: 0.5rem;
+	background: color-mix(in srgb, var(--color-muted) 70%, transparent);
+	user-select: text;
+	max-width: 100%;
+	min-width: 0;
+	box-sizing: border-box;
+	overflow: hidden;
+}
+
+.admin-md-preview .chat-md-code-toolbar-slot {
+	flex-shrink: 0;
+}
+
+.admin-md-preview .chat-md-code-toolbar {
+	position: relative;
+	z-index: 1;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 0.5rem;
+	padding: 0.28rem 1px 0.32rem 0.72rem;
+	border-radius: 0.4rem 0.4rem 0 0;
+	background: color-mix(in srgb, var(--color-primary) 8%, transparent);
+	backdrop-filter: blur(8px);
+	-webkit-backdrop-filter: blur(8px);
+}
+
+.admin-md-preview .chat-md-code-lang {
+	font-size: 13px;
+	line-height: 1.25;
+	color: var(--color-foreground);
+	opacity: 0.75;
+	font-variant-numeric: tabular-nums;
+}
+
+.admin-md-preview .chat-md-code-actions {
+	display: flex;
+	align-items: center;
+	flex-shrink: 0;
+	padding-right: 10px;
+	gap: 0.25rem;
+}
+
+.admin-md-preview .chat-md-code-btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 6px;
+	font-size: 13px;
+	height: 24px;
+	border-radius: 5px;
+	border: none;
+	background: transparent;
+	color: var(--color-foreground);
+	opacity: 0.8;
+	font-weight: normal;
+	cursor: pointer;
+	transition:
+		opacity 0.15s ease,
+		color 0.15s ease,
+		background-color 0.15s ease;
+}
+
+.admin-md-preview .chat-md-code-btn + .chat-md-code-btn {
+	margin-left: 12px;
+}
+
+.admin-md-preview .chat-md-code-btn::before {
+	content: "";
+	display: inline-block;
+	flex-shrink: 0;
+	width: 16px;
+	height: 16px;
+	background-color: currentColor;
+	transform: translateY(0.5px);
+	-webkit-mask-repeat: no-repeat;
+	-webkit-mask-position: center;
+	-webkit-mask-size: 16px 16px;
+	mask-repeat: no-repeat;
+	mask-position: center;
+	mask-size: 16px 16px;
+	margin-right: 2px;
+	margin-bottom: 1px;
+}
+
+.admin-md-preview .chat-md-code-btn[data-chat-code-action="copy"]::before {
+	-webkit-mask-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22currentColor%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Crect%20width%3D%2214%22%20height%3D%2214%22%20x%3D%228%22%20y%3D%228%22%20rx%3D%222%22%20ry%3D%222%22%2F%3E%3Cpath%20d%3D%22M4%2016c-1.1%200-2-.9-2-2V4c0-1.1.9-2%202-2h10c1.1%200%202%20.9%202%202%22%2F%3E%3C%2Fsvg%3E");
+	mask-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22currentColor%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Crect%20width%3D%2214%22%20height%3D%2214%22%20x%3D%228%22%20y%3D%228%22%20rx%3D%222%22%20ry%3D%222%22%2F%3E%3Cpath%20d%3D%22M4%2016c-1.1%200-2-.9-2-2V4c0-1.1.9-2%202-2h10c1.1%200%202%20.9%202%202%22%2F%3E%3C%2Fsvg%3E");
+}
+
+.admin-md-preview .chat-md-code-btn[data-chat-code-action="download"]::before {
+	-webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4'/%3E%3Cpolyline points='7 10 12 15 17 10'/%3E%3Cline x1='12' y1='15' x2='12' y2='3'/%3E%3C/svg%3E");
+	mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4'/%3E%3Cpolyline points='7 10 12 15 17 10'/%3E%3Cline x1='12' y1='15' x2='12' y2='3'/%3E%3C/svg%3E");
+}
+
+.admin-md-preview
+	.chat-md-code-btn[data-chat-code-action="copy"][data-chat-code-copied="1"] {
+	color: var(--color-primary);
+	opacity: 1;
+}
+
+.admin-md-preview
+	.chat-md-code-btn[data-chat-code-action="copy"][data-chat-code-copied="1"]::before {
+	-webkit-mask-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22currentColor%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M21.801%2010A10%2010%200%201%201%2017%203.335%22%2F%3E%3Cpath%20d%3D%22m9%2011%203%203L22%204%22%2F%3E%3C%2Fsvg%3E");
+	mask-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22currentColor%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M21.801%2010A10%2010%200%201%201%2017%203.335%22%2F%3E%3Cpath%20d%3D%22m9%2011%203%203L22%204%22%2F%3E%3C%2Fsvg%3E");
+}
+
+.admin-md-preview .chat-md-code-btn:hover {
+	opacity: 1;
+	color: var(--color-primary);
+}
+
+.admin-md-preview .chat-md-code-block pre {
+	margin: 0 !important;
+	padding: 0.75rem 1rem !important;
+	border-radius: 0 0 0.5rem 0.5rem;
+	background: transparent !important;
+	overflow-x: auto;
+}
+
+.admin-md-preview .chat-md-code-block code.hljs,
+.admin-md-preview .chat-md-code-block .hljs {
+	background: transparent !important;
+	padding: 0 !important;
+}

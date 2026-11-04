@@ -1,4 +1,8 @@
-import { Injectable, ServiceUnavailableException } from '@nestjs/common';
+import {
+	Injectable,
+	NotFoundException,
+	ServiceUnavailableException,
+} from '@nestjs/common';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 import { DB_CONNECTIONS } from '../../database/constants';
@@ -80,6 +84,23 @@ export class AiLearningNoteService {
 		const [list, total] = await qb.getManyAndCount();
 		const viewList = await this.resolveAuthors(list);
 		return { list: viewList, total };
+	}
+
+	async findOne(id: string, scopeAiUserId?: number | null) {
+		this.assertReady();
+		if (scopeAiUserId === null) {
+			throw new NotFoundException('笔记不存在');
+		}
+		const qb = this.noteRepository
+			.createQueryBuilder('eln')
+			.where('eln.id = :id', { id });
+		if (scopeAiUserId != null) {
+			qb.andWhere('eln.userId = :aiUserId', { aiUserId: scopeAiUserId });
+		}
+		const row = await qb.getOne();
+		if (!row) throw new NotFoundException('笔记不存在');
+		const [withAuthor] = await this.resolveAuthors([row]);
+		return withAuthor;
 	}
 
 	async delete(id: string, scopeAiUserId?: number | null) {

@@ -75,6 +75,20 @@ export class AiKnowledgeService {
 		return this.queryList(this.knowledgeRepository, query);
 	}
 
+	async findOne(id: string, scopeAiUserId?: number | null) {
+		this.assertReady();
+		if (scopeAiUserId === null) {
+			return null;
+		}
+		const qb = this.knowledgeRepository
+			.createQueryBuilder('kb')
+			.where('kb.id = :id', { id });
+		if (scopeAiUserId != null) {
+			qb.andWhere('kb.authorId = :aiUserId', { aiUserId: scopeAiUserId });
+		}
+		return qb.getOne();
+	}
+
 	async findAllTrash(query: {
 		pageNo?: number;
 		pageSize?: number;

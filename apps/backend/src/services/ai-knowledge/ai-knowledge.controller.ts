@@ -2,6 +2,7 @@ import {
 	Controller,
 	Delete,
 	Get,
+	NotFoundException,
 	Param,
 	Query,
 	Req,
@@ -77,6 +78,20 @@ export class AiKnowledgeController {
 			scopeAiUserId,
 			author: isAdmin ? query.author : undefined,
 		});
+	}
+
+	@Get('/getKnowledge/:id')
+	async getKnowledge(
+		@Req() req: Request & { user?: { userId?: number } },
+		@Param('id') id: string,
+	) {
+		const { isAdmin, scopeAiUserId } = await this.resolveScope(req);
+		const row = await this.aiKnowledgeService.findOne(
+			id,
+			isAdmin ? undefined : scopeAiUserId,
+		);
+		if (!row) throw new NotFoundException('知识文章不存在');
+		return row;
 	}
 
 	@Get('/getKnowledgeTrash')

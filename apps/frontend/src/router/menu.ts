@@ -11,6 +11,7 @@ import {
 	NotebookPen,
 	ScrollText,
 	Server,
+	Share2,
 	Shield,
 	Users,
 } from 'lucide-react';
@@ -42,6 +43,7 @@ export const menuItems: MenuEntry[] = [
 			{ path: '/ai-daily-reading', label: '日推管理', icon: CalendarDays },
 			{ path: '/ai-knowledge', label: '知识管理', icon: Database },
 			{ path: '/ai-learning-note', label: '学习笔记', icon: NotebookPen },
+			{ path: '/ai-shares', label: '分享管理', icon: Share2 },
 			{ path: '/ai-logs', label: '日志管理', icon: ScrollText },
 		],
 	},

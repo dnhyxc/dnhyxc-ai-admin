@@ -71,6 +71,18 @@ export class AiLearningNoteController {
 		return this.noteService.findAll({ ...query, scopeAiUserId });
 	}
 
+	@Get('/getNote/:id')
+	async getNote(
+		@Req() req: Request & { user?: { userId?: number } },
+		@Param('id') id: string,
+	) {
+		const { isAdmin, scopeAiUserId } = await this.resolveScope(req);
+		return this.noteService.findOne(
+			id,
+			isAdmin ? undefined : scopeAiUserId,
+		);
+	}
+
 	@Delete('/deleteNote/:id')
 	async deleteNote(
 		@Req() req: Request & { user?: { userId?: number } },

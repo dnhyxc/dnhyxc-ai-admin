@@ -35,6 +35,10 @@ export const API = {
 	deleteAiKnowledge: '/ai-knowledge/deleteKnowledge',
 	deleteAiKnowledgeTrash: '/ai-knowledge/deleteKnowledgeTrash',
 	aiLearningNotes: '/ai-learning-note/getNotes',
+	aiLearningNote: '/ai-learning-note/getNote',
 	deleteAiLearningNote: '/ai-learning-note/deleteNote',
+	aiShares: '/ai-share/getShares',
+	aiShare: '/ai-share/getShare',
+	aiKnowledgeDetail: '/ai-knowledge/getKnowledge',
 	health: '/health',
 } as const;

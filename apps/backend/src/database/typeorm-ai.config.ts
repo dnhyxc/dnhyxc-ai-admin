@@ -9,6 +9,7 @@ import { AiKnowledge } from '../services/ai-knowledge/ai-knowledge.entity';
 import { AiKnowledgeTrash } from '../services/ai-knowledge/ai-knowledge-trash.entity';
 import { AiLearningNote } from '../services/ai-learning-note/ai-learning-note.entity';
 import { AiLog } from '../services/ai-logs/ai-log.entity';
+import { AiShare } from '../services/ai-share/ai-share.entity';
 import { AiRole } from '../services/ai-user/ai-role.entity';
 import { AiUser } from '../services/ai-user/ai-user.entity';
 import { parseBoolean } from '../utils';
@@ -63,6 +64,7 @@ export class TypeOrmAiConfigService implements TypeOrmOptionsFactory {
 				AiLearningNote,
 				AiDailyReading,
 				AiDailyReadingAttempt,
+				AiShare,
 			],
 			// 企业级硬约束：业务库禁止自动同步
 			synchronize: false,

@@ -5,9 +5,13 @@ import { store } from '@/store';
 import { AiDailyReadingDetailPage } from '@/views/ai-daily-reading/AiDailyReadingDetailPage';
 import { AiDailyReadingPage } from '@/views/ai-daily-reading/AiDailyReadingPage';
 import { AiEbooksPage } from '@/views/ai-ebooks/AiEbooksPage';
+import { AiKnowledgeDetailPage } from '@/views/ai-knowledge/AiKnowledgeDetailPage';
 import { AiKnowledgePage } from '@/views/ai-knowledge/AiKnowledgePage';
+import { AiLearningNoteDetailPage } from '@/views/ai-learning-note/AiLearningNoteDetailPage';
 import { AiLearningNotePage } from '@/views/ai-learning-note/AiLearningNotePage';
 import { AiLogsPage } from '@/views/ai-logs/AiLogsPage';
+import { AiShareDetailPage } from '@/views/ai-shares/AiShareDetailPage';
+import { AiSharesPage } from '@/views/ai-shares/AiSharesPage';
 import { AiUsersPage } from '@/views/ai-users/AiUsersPage';
 import { BindAiUserPage } from '@/views/bind-ai-user/BindAiUserPage';
 import { DashboardPage } from '@/views/dashboard/DashboardPage';
@@ -86,8 +90,16 @@ export const router = createBrowserRouter([
 				element: <AiDailyReadingDetailPage />,
 			},
 			{ path: 'ai-knowledge', element: <AiKnowledgePage /> },
+			{ path: 'ai-knowledge/:id', element: <AiKnowledgeDetailPage /> },
 			{ path: 'ai-logs', element: <AiLogsPage /> },
 			{ path: 'ai-learning-note', element: <AiLearningNotePage /> },
+			{
+				path: 'ai-learning-note/:id',
+				element: <AiLearningNoteDetailPage />,
+			},
+
+			{ path: 'ai-shares', element: <AiSharesPage /> },
+			{ path: 'ai-shares/:shareId', element: <AiShareDetailPage /> },
 			{ path: 'logs', element: <LogsPage /> },
 		],
 	},

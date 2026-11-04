@@ -129,5 +129,17 @@ export const deleteAiKnowledgeTrashApi = (id: string) =>
 export const getAiLearningNotesApi = (querys?: Record<string, any>) =>
 	http.get(API.aiLearningNotes, { querys, silent: true });
 
+export const getAiLearningNoteApi = (id: string) =>
+	http.get(API.aiLearningNote, { params: [id], silent: true });
+
 export const deleteAiLearningNoteApi = (id: string) =>
 	http.delete(API.deleteAiLearningNote, { params: [id] });
+
+export const getAiSharesApi = (querys?: Record<string, any>) =>
+	http.get(API.aiShares, { querys, silent: true });
+
+export const getAiShareApi = (shareId: string) =>
+	http.get(API.aiShare, { params: [shareId], silent: true });
+
+export const getAiKnowledgeDetailApi = (id: string) =>
+	http.get(API.aiKnowledgeDetail, { params: [id], silent: true });

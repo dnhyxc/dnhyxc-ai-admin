@@ -38,23 +38,35 @@ const DEFAULT_MENUS = [
 		icon: 'NotebookPen',
 	},
 	{
+		name: '分享管理',
+		path: '/ai-shares',
+		order: 9,
+		acl: 'ai-share',
+		icon: 'Share2',
+	},
+	{
 		name: 'AI 日志',
 		path: '/ai-logs',
-		order: 9,
+		order: 10,
 		acl: 'ai-logs',
 		icon: 'FileText',
 	},
 	{
 		name: '后台日志',
 		path: '/logs',
-		order: 10,
+		order: 11,
 		acl: 'logs',
 		icon: 'ScrollText',
 	},
 ];
 
 /** 普通用户默认可见菜单 path */
-const USER_MENU_PATHS = ['/ai-ebooks', '/ai-knowledge', '/ai-learning-note'];
+const USER_MENU_PATHS = [
+	'/ai-ebooks',
+	'/ai-knowledge',
+	'/ai-learning-note',
+	'/ai-shares',
+];
 
 @Injectable()
 export class SeedService implements OnModuleInit {
