@@ -93,7 +93,7 @@ export const AdminLayout = observer(function AdminLayout() {
 	};
 
 	return (
-		<div className="flex h-screen w-full bg-background">
+		<div className="flex h-screen w-full overflow-hidden bg-background">
 			<aside
 				className={cn(
 					'flex h-full flex-col bg-sidebar text-sidebar-foreground transition-all duration-300',
@@ -239,7 +239,7 @@ export const AdminLayout = observer(function AdminLayout() {
 				</ScrollArea>
 			</aside>
 
-			<div className="flex flex-1 flex-col overflow-hidden">
+			<div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
 				<header className="flex h-16 items-center justify-between border-b px-6">
 					<div className="flex items-center gap-4">
 						<Button
@@ -343,7 +343,7 @@ export const AdminLayout = observer(function AdminLayout() {
 					</div>
 				</header>
 
-				<main className="relative flex-1 overflow-auto">
+				<main className="relative min-h-0 min-w-0 flex-1 overflow-auto">
 					{noticeStore.visible && (
 						<div className="p-6 pb-0">
 							<Alert

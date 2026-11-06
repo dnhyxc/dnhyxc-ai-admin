@@ -11,7 +11,12 @@ export class AiShare {
 	@Column({ name: 'chat_session_id', type: 'varchar', length: 64 })
 	chatSessionId!: string;
 
-	@Column({ name: 'share_type', type: 'varchar', length: 32, default: 'session' })
+	@Column({
+		name: 'share_type',
+		type: 'varchar',
+		length: 32,
+		default: 'session',
+	})
 	shareType!: string;
 
 	@Column({ name: 'session_type', type: 'varchar', length: 32, nullable: true })

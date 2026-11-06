@@ -97,7 +97,6 @@ export const router = createBrowserRouter([
 				path: 'ai-learning-note/:id',
 				element: <AiLearningNoteDetailPage />,
 			},
-
 			{ path: 'ai-shares', element: <AiSharesPage /> },
 			{ path: 'ai-shares/:shareId', element: <AiShareDetailPage /> },
 			{ path: 'logs', element: <LogsPage /> },

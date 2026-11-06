@@ -226,68 +226,22 @@ foreignObject:focus-visible {
 	-webkit-tap-highlight-color: transparent;
 }
 
-/* TipTap / 学习笔记富文本 HTML 预览 */
-.admin-rich-text {
+/* richtext-kit：把 --theme-* / --rtk-* 绑到 admin 主题变量 */
+.admin-richtext-preview {
+	--theme-color: var(--color-primary);
+	--theme-background: var(--color-card);
+	--theme-textcolor: var(--color-foreground);
+	--theme-border: var(--color-border);
+	--rtk-accent: var(--color-primary);
+	--rtk-bg: var(--color-card);
+	--rtk-text: var(--color-foreground);
+	--rtk-border: var(--color-border);
+	background: var(--color-card);
 	color: var(--color-foreground);
-	line-height: 1.7;
-	word-break: break-word;
 }
-.admin-rich-text :where(p, ul, ol, blockquote, pre, table, h1, h2, h3, h4) {
-	margin: 0.75em 0;
-}
-.admin-rich-text :where(h1, h2, h3, h4) {
-	font-weight: 600;
-	line-height: 1.35;
-}
-.admin-rich-text h1 {
-	font-size: 1.5rem;
-}
-.admin-rich-text h2 {
-	font-size: 1.25rem;
-}
-.admin-rich-text h3 {
-	font-size: 1.1rem;
-}
-.admin-rich-text :where(ul, ol) {
-	padding-left: 1.5em;
-}
-.admin-rich-text a {
-	color: var(--color-primary);
-	text-decoration: underline;
-}
-.admin-rich-text img {
-	max-width: 100%;
-	height: auto;
-}
-.admin-rich-text blockquote {
-	border-left: 3px solid var(--color-border);
-	padding-left: 0.75em;
-	color: color-mix(in srgb, var(--color-foreground) 72%, transparent);
-}
-.admin-rich-text :where(code) {
-	font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-	font-size: 0.875em;
-	padding: 0.1em 0.35em;
-	border-radius: 4px;
-	background: color-mix(in srgb, var(--color-foreground) 8%, transparent);
-}
-.admin-rich-text pre {
-	overflow-x: auto;
-	padding: 0.75em 1em;
-	border-radius: 6px;
-	background: color-mix(in srgb, var(--color-foreground) 6%, transparent);
-}
-.admin-rich-text pre code {
-	padding: 0;
-	background: transparent;
-}
-.admin-rich-text table {
-	width: 100%;
-	border-collapse: collapse;
-}
-.admin-rich-text :where(th, td) {
-	border: 1px solid var(--color-border);
-	padding: 0.4em 0.6em;
+
+.note-preview-header {
+	height: 60px;
 }
 
 /*
@@ -302,13 +256,46 @@ foreignObject:focus-visible {
 	--fgColor-accent: var(--color-primary);
 	--bgColor-default: transparent;
 	--bgColor-muted: var(--color-muted);
-	--bgColor-neutral-muted: color-mix(in srgb, var(--color-muted) 55%, transparent);
+	--bgColor-neutral-muted: color-mix(
+		in srgb,
+		var(--color-muted) 55%,
+		transparent
+	);
 	--borderColor-default: var(--color-border);
 	--borderColor-muted: var(--color-border);
 	--borderColor-neutral-muted: var(--color-border);
 	--borderColor-accent-emphasis: var(--color-primary);
 	color: var(--color-foreground);
 	background-color: transparent;
+	width: 100%;
+	max-width: 100%;
+	min-width: 0;
+	overflow-wrap: break-word;
+}
+
+/*
+ * Radix ScrollArea 内容层是 inline style display:table + min-width:100%。
+ * 表格会按代码里最长的一行撑开，正文跟着变宽，再被外层裁到页面外面。
+ */
+.admin-md-preview [data-radix-scroll-area-viewport] > div {
+	display: block !important;
+	width: 100% !important;
+	min-width: 0 !important;
+	box-sizing: border-box;
+}
+
+.admin-md-preview .markdown-body pre,
+.admin-md-preview .markdown-body table {
+	max-width: 100%;
+}
+
+.admin-md-preview .markdown-body pre {
+	overflow-x: auto;
+}
+
+.admin-md-preview .markdown-body table {
+	display: block;
+	overflow-x: auto;
 }
 
 html.dark .admin-md-preview .markdown-body {

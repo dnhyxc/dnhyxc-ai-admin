@@ -122,7 +122,7 @@ const MarkdownInner = memo(function MarkdownInner({
 			className={cn(
 				// 字色/背景跟随 admin `.dark`，不跟系统 prefers-color-scheme（见 index.css .admin-md-preview）
 				'admin-md-preview',
-				'[&_.markdown-body]:min-w-0 [&_.markdown-body]:max-w-none [&_.markdown-body]:wrap-break-word [&_.markdown-body]:overflow-x-auto [&_.markdown-body]:bg-transparent! [&_.markdown-body]:text-[color:var(--color-foreground)]! [&_.markdown-body_pre]:max-w-full [&_.markdown-body_pre]:overflow-x-auto [&_.markdown-body_table]:block [&_.markdown-body_table]:max-w-full [&_.markdown-body_table]:overflow-x-auto',
+				'[&_.markdown-body]:w-full [&_.markdown-body]:min-w-0 [&_.markdown-body]:max-w-full [&_.markdown-body]:wrap-break-word [&_.markdown-body]:bg-transparent! [&_.markdown-body]:text-[color:var(--color-foreground)]! [&_.markdown-body_pre]:max-w-full [&_.markdown-body_pre]:overflow-x-auto [&_.markdown-body_table]:block [&_.markdown-body_table]:max-w-full [&_.markdown-body_table]:overflow-x-auto',
 				enableMermaid && MARKDOWN_MERMAID_TAILWIND_CURSOR_ZOOM_IN_CLASS,
 			)}
 		>

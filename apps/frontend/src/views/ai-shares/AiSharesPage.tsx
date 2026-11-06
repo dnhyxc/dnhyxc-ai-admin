@@ -1,9 +1,19 @@
-import { Button, Input, Select, Space, Table, Tag, Typography } from 'antd';
+import {
+	Button,
+	Input,
+	message,
+	Popconfirm,
+	Select,
+	Space,
+	Table,
+	Tag,
+	Typography,
+} from 'antd';
 import { observer } from 'mobx-react';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { DEFAULT_PAGE_SIZE, tablePagination } from '@/lib/table-pagination';
-import { getAiSharesApi } from '@/service';
+import { deleteAiShareApi, getAiSharesApi } from '@/service';
 import { useStore } from '@/store';
 
 type ShareRow = {
@@ -142,17 +152,33 @@ export const AiSharesPage = observer(function AiSharesPage() {
 		{
 			title: '操作',
 			key: 'action',
-			width: 80,
+			width: 120,
 			fixed: 'right' as const,
 			render: (_: unknown, r: ShareRow) => (
-				<Button
-					type="link"
-					size="small"
-					className="px-0!"
-					onClick={() => navigate(`/ai-shares/${r.shareId}`)}
-				>
-					查看
-				</Button>
+				<Space>
+					<Button
+						type="link"
+						size="small"
+						className="px-0!"
+						onClick={() => navigate(`/ai-shares/${r.shareId}`)}
+					>
+						查看
+					</Button>
+					<Popconfirm
+						title="确认删除？不可恢复"
+						onConfirm={async () => {
+							await deleteAiShareApi(r.shareId);
+							message.success('已删除');
+							const nextPage =
+								list.length === 1 && pageNo > 1 ? pageNo - 1 : pageNo;
+							load(nextPage, pageSize);
+						}}
+					>
+						<Button danger type="link" size="small" className="px-0!">
+							删除
+						</Button>
+					</Popconfirm>
+				</Space>
 			),
 		},
 	];

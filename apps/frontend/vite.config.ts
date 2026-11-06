@@ -21,7 +21,13 @@ export default defineConfig(({ mode }) => {
 		 * - CSS-in-JS 运行时只注入用到的组件样式，无需 babel-plugin-import / unplugin-vue-components
 		 */
 		optimizeDeps: {
-			include: ['antd', '@ant-design/icons', 'dayjs'],
+			include: [
+				'antd',
+				'@ant-design/icons',
+				'dayjs',
+				'@dnhyxc-ai/richtext-kit/preview',
+				'@dnhyxc-ai/richtext-kit/windowed',
+			],
 		},
 		build: {
 			rollupOptions: {

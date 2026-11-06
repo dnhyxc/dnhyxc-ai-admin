@@ -1,4 +1,4 @@
-import { Button, Tag, Typography, message } from 'antd';
+import { Button, message, Tag, Typography } from 'antd';
 import {
 	ArrowDownToLine,
 	ArrowUpToLine,
@@ -7,13 +7,7 @@ import {
 	Paperclip,
 } from 'lucide-react';
 import { observer } from 'mobx-react';
-import {
-	useCallback,
-	useEffect,
-	useMemo,
-	useRef,
-	useState,
-} from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
 import Markdown from '@/components/Markdown';
 import { cn } from '@/lib/utils';
@@ -233,7 +227,7 @@ function SessionShareView({
 									isUser ? 'items-end' : 'items-stretch',
 								)}
 							>
-								{!!message.attachments?.length && isUser ? (
+								{message.attachments?.length && isUser ? (
 									<div className="flex flex-wrap justify-end gap-1.5 mb-1">
 										{message.attachments.map((file, i) => {
 											const name =
@@ -244,7 +238,7 @@ function SessionShareView({
 											return (
 												<span
 													key={file.id || file.uuid || `${message.id}-${i}`}
-													className="inline-flex items-center gap-1 rounded border border-[color:var(--color-border)] bg-[color:var(--color-muted)] px-2 py-1 text-xs text-[color:var(--color-muted-foreground)]"
+													className="inline-flex items-center gap-1 rounded border border-(--color-border) bg-(--color-muted) px-2 py-1 text-xs text-muted-foreground"
 												>
 													<Paperclip className="size-3.5 shrink-0" />
 													<span className="max-w-48 truncate">{name}</span>
@@ -264,7 +258,7 @@ function SessionShareView({
 										'relative rounded-md p-3 select-text min-w-0',
 										isUser
 											? // 用户：muted 底
-												'ml-auto w-fit max-w-full bg-[color:var(--color-muted)] border border-[color:var(--color-border)]'
+												'ml-auto w-fit max-w-full bg-(--color-muted) border border-(--color-border)'
 											: // 助手：主题色偏实
 												'w-full bg-[color-mix(in_srgb,var(--color-primary)_16%,var(--color-card))] border border-[color-mix(in_srgb,var(--color-primary)_28%,transparent)]',
 									)}
@@ -279,7 +273,7 @@ function SessionShareView({
 
 								<div
 									className={cn(
-										'flex items-center gap-2 text-xs text-[color:var(--color-muted-foreground)]',
+										'flex items-center gap-2 text-xs text-muted-foreground',
 										isUser ? 'justify-end' : 'justify-start',
 									)}
 								>
@@ -288,7 +282,7 @@ function SessionShareView({
 									) : null}
 									<button
 										type="button"
-										className="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[color:var(--color-muted-foreground)] hover:bg-[color:var(--color-muted)] hover:text-[color:var(--color-foreground)]"
+										className="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-muted-foreground hover:bg-(--color-muted) hover:text-(--color-foreground)"
 										onClick={() =>
 											onCopy(message.content, message.chatId || message.id)
 										}
@@ -318,8 +312,8 @@ function SessionShareView({
 					onClick={onScrollFabClick}
 					className={cn(
 						'absolute bottom-4 right-4 z-20 flex size-10 items-center justify-center rounded-full',
-						'border border-[color:var(--color-border)] bg-[color:color-mix(in_srgb,var(--color-card)_95%,transparent)] text-[color:var(--color-muted-foreground)] shadow-md backdrop-blur-sm',
-						'transition-colors hover:border-[color-mix(in_srgb,var(--color-primary)_40%,var(--color-border))] hover:text-[color:var(--color-foreground)] hover:bg-[color-mix(in_srgb,var(--color-primary)_8%,var(--color-card))]',
+						'border border-(--color-border) bg-[color-mix(in_srgb,var(--color-card)_95%,transparent)] text-muted-foreground shadow-md backdrop-blur-sm',
+						'transition-colors hover:border-[color-mix(in_srgb,var(--color-primary)_40%,var(--color-border))] hover:text-(--color-foreground) hover:bg-[color-mix(in_srgb,var(--color-primary)_8%,var(--color-card))]',
 					)}
 				>
 					{atBottom ? (
@@ -361,7 +355,9 @@ export const AiShareDetailPage = observer(function AiShareDetailPage() {
 	const displayMessages = useMemo(() => {
 		if (!detail || isKnowledge) return [];
 		const snap = detail.contentSnapshot;
-		const raw = Array.isArray(snap?.messages) ? (snap.messages as unknown[]) : [];
+		const raw = Array.isArray(snap?.messages)
+			? (snap.messages as unknown[])
+			: [];
 		const normalized = normalizeShareMessages(raw);
 		const ids = detail.messageIds?.filter(Boolean) ?? [];
 		if (ids.length) return pickMessagesInShareIdsOrder(normalized, ids);
@@ -369,12 +365,12 @@ export const AiShareDetailPage = observer(function AiShareDetailPage() {
 	}, [detail, isKnowledge]);
 
 	return (
-		<div className="h-full flex flex-col">
+		<div className="flex h-full min-w-0 flex-col">
 			<div className="shrink-0 px-6 pt-6 pb-4 flex items-start justify-between gap-4">
 				<div className="min-w-0">
 					<div className="flex items-center gap-3 flex-wrap">
 						<Button onClick={() => navigate('/ai-shares')}>返回列表</Button>
-						<Typography.Title level={4} className="!m-0 truncate">
+						<Typography.Title level={4} className="m-0! truncate">
 							{detail?.title || '分享详情'}
 						</Typography.Title>
 						{status ? <Tag color={status.color}>{status.label}</Tag> : null}
@@ -393,8 +389,8 @@ export const AiShareDetailPage = observer(function AiShareDetailPage() {
 				</div>
 			</div>
 
-			<div className="flex-1 min-h-0 overflow-hidden px-6 pb-6">
-				<div className="h-full min-h-0 rounded border border-[color:var(--color-border)] bg-[color:var(--color-card)] overflow-hidden">
+			<div className="min-h-0 min-w-0 flex-1 overflow-hidden px-6 pb-6">
+				<div className="h-full min-h-0 min-w-0 overflow-hidden rounded border border-(--color-border) bg-(--color-card)">
 					{!detail ? (
 						<div className="p-6">
 							<Typography.Text type="secondary">暂无数据</Typography.Text>

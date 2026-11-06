@@ -1,5 +1,6 @@
 import {
 	Controller,
+	Delete,
 	Get,
 	Param,
 	Query,
@@ -81,5 +82,17 @@ export class AiShareController {
 	) {
 		const { scopeAiUserId } = await this.resolveScope(req);
 		return this.shareService.findOne(shareId, scopeAiUserId);
+	}
+
+	@Delete('/deleteShare/:shareId')
+	async deleteShare(
+		@Req() req: Request & { user?: { userId?: number } },
+		@Param('shareId') shareId: string,
+	) {
+		const { isAdmin, scopeAiUserId } = await this.resolveScope(req);
+		return this.shareService.delete(
+			shareId,
+			isAdmin ? undefined : scopeAiUserId,
+		);
 	}
 }

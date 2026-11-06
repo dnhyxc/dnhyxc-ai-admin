@@ -11,7 +11,13 @@ const ScrollArea = React.forwardRef<
 		className={cn('relative overflow-hidden', className)}
 		{...props}
 	>
-		<ScrollAreaPrimitive.Viewport className="h-full w-full rounded-[inherit]">
+		<ScrollAreaPrimitive.Viewport
+			className={cn(
+				'h-full w-full rounded-[inherit]',
+				// 内容层默认 display:table，会按最长一行撑开页面
+				'[&>div]:block! [&>div]:min-w-0! [&>div]:w-full!',
+			)}
+		>
 			{children}
 		</ScrollAreaPrimitive.Viewport>
 		<ScrollBar />
@@ -30,9 +36,9 @@ const ScrollBar = React.forwardRef<
 		className={cn(
 			'flex touch-none select-none transition-colors',
 			orientation === 'vertical' &&
-				'h-full w-2.5 border-l border-l-transparent p-[1px]',
+				'h-full w-2.5 border-l border-l-transparent p-px',
 			orientation === 'horizontal' &&
-				'h-2.5 flex-col border-t border-t-transparent p-[1px]',
+				'h-2.5 flex-col border-t border-t-transparent p-px',
 			className,
 		)}
 		{...props}

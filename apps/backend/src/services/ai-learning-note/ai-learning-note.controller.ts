@@ -77,10 +77,7 @@ export class AiLearningNoteController {
 		@Param('id') id: string,
 	) {
 		const { isAdmin, scopeAiUserId } = await this.resolveScope(req);
-		return this.noteService.findOne(
-			id,
-			isAdmin ? undefined : scopeAiUserId,
-		);
+		return this.noteService.findOne(id, isAdmin ? undefined : scopeAiUserId);
 	}
 
 	@Delete('/deleteNote/:id')

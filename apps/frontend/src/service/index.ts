@@ -141,5 +141,8 @@ export const getAiSharesApi = (querys?: Record<string, any>) =>
 export const getAiShareApi = (shareId: string) =>
 	http.get(API.aiShare, { params: [shareId], silent: true });
 
+export const deleteAiShareApi = (shareId: string) =>
+	http.delete(API.deleteAiShare, { params: [shareId] });
+
 export const getAiKnowledgeDetailApi = (id: string) =>
 	http.get(API.aiKnowledgeDetail, { params: [id], silent: true });

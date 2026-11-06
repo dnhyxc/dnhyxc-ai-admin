@@ -118,4 +118,20 @@ export class AiShareService {
 		const [withAuthor] = await this.resolveAuthors([row]);
 		return withAuthor;
 	}
+
+	async delete(shareId: string, scopeAiUserId?: number | null) {
+		this.assertReady();
+		if (scopeAiUserId === null) {
+			throw new NotFoundException('分享不存在');
+		}
+		const qb = this.shareRepo
+			.createQueryBuilder('s')
+			.where('s.shareId = :shareId', { shareId });
+		if (scopeAiUserId != null) {
+			qb.andWhere('s.createdBy = :uid', { uid: scopeAiUserId });
+		}
+		const target = await qb.getOne();
+		if (!target) throw new NotFoundException('分享不存在');
+		await this.shareRepo.delete({ shareId: target.shareId });
+	}
 }

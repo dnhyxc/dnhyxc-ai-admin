@@ -1,4 +1,4 @@
-import { Button, Typography, message } from 'antd';
+import { Button, message, Typography } from 'antd';
 import { observer } from 'mobx-react';
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
